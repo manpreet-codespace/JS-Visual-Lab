@@ -103,6 +103,11 @@
     --error: #EF4444;
     --text: #F8FAFC;
     --muted: #94A3B8;
+    --cyan: #67E8F9;
+    --sky: #7DD3FC;
+    --voilet:#C4B5FD;
+    --amber:#FCD34D;
+
   }
 }
 
@@ -164,6 +169,18 @@ body::after {
   background: linear-gradient(to right, var(--text),var(--secondary),var(--primary) );
   -webkit-background-clip: text;
   background-clip: text;
+  color:transparent;
+
+}
+.gradient{
+  background: linear-gradient(to right ,var(--cards),#0B0F19);
+
+}
+
+.text-gradient1{
+  background: linear-gradient(to right,var(--cyan),var(--sky),var(--voilet),var(--amber));
+  -webkit-background-clip: text;
+  background-clip:text;
   color:transparent;
 
 }

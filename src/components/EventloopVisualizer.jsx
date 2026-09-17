@@ -3,7 +3,7 @@ import { Check, Dot } from "lucide-react";
 export default function EventloopVisualizer(){
     return(
         <>
-        <div className="border border-[var(--secondary)]/20 w-10/12 rounded-lg bg-[var(--bg)] ">
+        <div className="border border-[var(--secondary)]/20 w-10/12 rounded-lg bg-[var(--bg)] gradient  shadow-[2px_2px_80px_#06b5d425]">
             <div className="flex justify-between items-center border-b border-[var(--secondary)]/20 p-4">
                 <p className="text-sm font-semibold">Event loop/live preview</p>
                 <p className="flex items-center text-[#229f19] text-[10px] "><Dot color="#229f19"/> LIVE</p>

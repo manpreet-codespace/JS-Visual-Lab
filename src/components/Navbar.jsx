@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Navbar(){
     return(
         <>
-            <nav className=" flex w-screen justify-between h-20 border-b border-white/20 bg-[var(--bg)] fixed inset-0 z-40">
+            <nav className=" flex w-screen justify-between h-20 border-b border-white/20 bg-[var(--bg)] fixed inset-0 z-100">
                 <div className="w-[90%] mx-auto flex justify-between items-center">
 
                 <div className="text-white/60 text-sm flex gap-10">
