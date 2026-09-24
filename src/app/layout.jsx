@@ -37,7 +37,8 @@ export default function RootLayout({ children }) {
             COLOR_UPDATE_SPEED={10}
             SHADING
             RAINBOW_MODE={false}
-            COLOR="#A855F7" /> */}
+            COLOR="#a57dca"
+         /> */}
           <Navbar />
 
           {children}

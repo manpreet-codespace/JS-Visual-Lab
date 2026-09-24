@@ -1,8 +1,14 @@
+"use client"
+
+
 import EventloopVisualizer from "@/components/EventloopVisualizer";
 import { topics } from "@/data/topics";
 import { ArrowRight, Flame } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+ const router = useRouter();
+
   return (
     <>
       <main className="relative z-60 mt-30 flex justify-around w-screen">
@@ -33,17 +39,17 @@ export default function Home() {
         <div className="flex flex-wrap gap-6 justify-center mt-10  ">
           {
             topics.map((topic)=>(
-              <div key={topic.id} className="p-3 border border-white/10 w-5/12 bg-[var(--bg)] gradient  rounded-lg hover:border-[var(--primary)] hover:shadow-[1px_1px_5px_var(--primary)] space-y-2">
+              <div key={topic.id} onClick={()=>router.push(`/lab/${topic.slug}`)} className="p-3 border border-white/10 w-3/12 bg-[var(--bg)] gradient  rounded-lg hover:border-[var(--primary)] hover:shadow-[1px_1px_5px_var(--primary)] space-y-2">
                 <div className="flex justify-between">
-                  <h1 className="text-lg font-semibold  ">{topic.topic}</h1>
-                  <span className={`px-2 py-1 text-[10px] rounded-sm  ${topic.level  === "Intermediate" 
-                    ?  "border border-[var(--warning)] bg-[var(--warning)]/20"
-                    : topic.level ==="Beginner" 
-                    ? "border border-[var(--success)] bg-[var(--success)]/20" 
-                    : "border border-[var(--error)] bg-[var(--error)]/20" }`}>{topic.level.toUpperCase()}</span>
+                  <h1 className="text-lg font-semibold ">{topic.topic}</h1>
+                  <span className={`px-2 py-1 h-5 text-[9px] rounded-sm  ${topic.difficulty  === "Intermediate" 
+                    ?  "border border-[var(--warning)] text-[var(--warning)] bg-[var(--warning)]/20"
+                    : topic.difficulty ==="Beginner" 
+                    ? "border border-[var(--success)] text-[var(--success)] bg-[var(--success)]/20" 
+                    : "border border-[var(--error)] text-[var(--error)] bg-[var(--error)]/20" }`}>{topic.difficulty.toUpperCase()}</span>
                 </div>
                 <div>
-                  <p className="text-white/60 ">
+                  <p className="text-white/60 text-sm ">
                     {topic.description}
                   </p>
                   </div>
