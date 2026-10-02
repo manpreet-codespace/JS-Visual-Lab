@@ -7,26 +7,34 @@ export default function Sidebar() {
     const router = useRouter();
 
     return (
-        <>
-            <aside className="bg-[var(--bg)] relative z-50 mt-20">
-                <div className="">
-                    {
-                        topics.map((topic) => (
-                            <div key={topic.id} onClick={()=>router.push(`/lab/${topic.slug}`)}  className="py-2 px-4 mt-5  w-8/10 mx-auto border border-white/10 bg-[var(--bg)] gradient  rounded-full hover:border-[var(--primary)] hover:shadow-[1px_1px_5px_var(--primary)]">
-                                <div className="flex justify-between">
-                                    <h1 className="text-md font-semibold ">{topic.topic}</h1>
-                                    <span className={`py-1 px-2 h-6 text-[10px] rounded-full  ${topic.difficulty === "Intermediate"
-                                        ? "border border-[var(--warning)] text-[var(--warning)] bg-[var(--warning)]/20"
+        <aside className="relative z-50 w-full max-w-[330px] shrink-0 border-r border-white/10 bg-[#0a1020]/80 px-3 py-4 backdrop-blur-xl">
+            <div className="flex flex-col gap-3">
+                {topics.map((topic) => (
+                    <button
+                        key={topic.id}
+                        type="button"
+                        onClick={() => router.push(`/lab/${topic.slug}`)}
+                        className="group w-full rounded-full border border-white/10 bg-white/4 px-4 py-3 text-left transition-all duration-200 hover:border-violet-400/60 hover:bg-violet-500/10 hover:shadow-[0_10px_24px_rgba(139,92,246,0.12)]"
+                    >
+                        <div className="flex items-center justify-between gap-3">
+                            <h3 className="text-base font-medium text-slate-100 transition-colors group-hover:text-white">
+                                {topic.topic}
+                            </h3>
+                            <span
+                                className={`topic-badge ${
+                                    topic.difficulty === "Intermediate"
+                                        ? "border border-amber-400/40 bg-amber-500/10 text-amber-300"
                                         : topic.difficulty === "Beginner"
-                                            ? "border border-[var(--success)] text-[var(--success)] bg-[var(--success)]/20"
-                                            : "border border-[var(--error)] text-[var(--error)] bg-[var(--error)]/20"}`}>{topic.difficulty.toLowerCase()}</span>
-                                </div>
-                            </div>
-                        ))
-                    }
-                </div>
-            </aside>
-
-        </>
-    )
+                                            ? "border border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                                            : "border border-rose-400/40 bg-rose-500/10 text-rose-300"
+                                }`}
+                            >
+                                {topic.difficulty.toLowerCase()}
+                            </span>
+                        </div>
+                    </button>
+                ))}
+            </div>
+        </aside>
+    );
 }
