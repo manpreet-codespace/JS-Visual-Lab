@@ -5,6 +5,9 @@ import Callback from "@/components/topics/Callback/Callback";
 import ThisTopic from "@/components/topics/ThisTopic/ThisTopic";
 import FunctionsTopic from "@/components/topics/Functions/FunctionsTopic";
 import CopyTopic from "@/components/topics/CopyTopic/CopyTopic";
+import SpreadRestTopic from "@/components/topics/SpreadRestTopic/SpreadRestTopic";
+import ImportExportTopic from "@/components/topics/ImportExportTopic/ImportExportTopic";
+import TypeCoercionTopic from "@/components/topics/TypeCoercionTopic/TypeCoercionTopic";
 import GenericTopicLayout from "@/components/topics/GenericTopicLayout";
 import VarHoisting from "@/components/topics/Hoisting/VarHoisting";
 import LetHoisting from "@/components/topics/Hoisting/LetHoisting";
@@ -1422,10 +1425,17 @@ const { name, age } = user;`,
         description:"Explore JavaScript spread and rest operators through an interactive visualization. See how ... expands arrays and objects, combines or copies data, and collects multiple values into a single variable or function parameter.",
         difficulty:"Beginner",
         slug:'spread-rest-operator',
-        component: GenericTopicLayout,
-        code: `const nums = [1, 2, 3];
-const copy = [...nums, 4];
-const sum = (...values) => values.reduce((a, b) => a + b, 0);`,
+        component: SpreadRestTopic,
+        code: `const values = [2, 4, 6];
+    const expanded = [...values, 8];
+    const [first, ...remaining] = values;
+    const collect = (head, ...tail) => [head, tail];
+    const collected = collect(...values);
+    console.log(expanded, remaining, collected);`,
+        visualization: {
+            title:"Spread expands, rest collects",
+            type:"spread-rest"
+        },
         preview: {
             title:"Spread and rest",
             summary:"The spread operator expands values, while the rest operator collects multiple values into one parameter.",
@@ -1433,17 +1443,82 @@ const sum = (...values) => values.reduce((a, b) => a + b, 0);`,
             keyPoints:["Expand iterable values", "Collect remaining values", "Useful in arrays and functions"]
         },
         conceptData: {
-            title:"Spread and rest",
+            title:"Spread and rest operators",
             summary:"... can either spread items into a new collection or collect remaining arguments into a single array parameter.",
             cards:[
-                { title:"Spread", description:"Expand values from arrays or objects into another structure." },
-                { title:"Rest", description:"Gather remaining arguments into a single array." },
-                { title:"Common use", description:"Used widely in cloning, merging, and variadic functions." }
+                {
+                    title:"Spread operator",
+                    description:"Expands iterable items or object properties into a new array, object, or function call. Copying with spread is shallow.",
+                    snippet:`const values = [2, 4, 6];
+const expanded = [...values, 8];
+const user = { name: "Aman" };
+const admin = { ...user, role: "admin" };
+
+function add(first, second, third) {
+  return first + second + third;
+}
+add(...values);`
+                },
+                {
+                    title:"Rest operator",
+                    description:"Collects remaining array elements or function arguments into one array. A rest parameter must be the final parameter.",
+                    snippet:`const [first, ...remaining] = [2, 4, 6];
+
+function sum(head, ...tail) {
+  return tail.reduce((total, value) => total + value, head);
+}
+
+sum(first, ...remaining);`
+                }
             ],
-            takeaways:["expand with spread", "collect with rest", "works in arrays and function params"]
+            takeaways:["spread expands values at the use site", "rest collects values into an array", "the syntax is the same but the position gives it meaning"]
         },
-        variables:[],
-        steps:[]
+        variables: [
+            { id:"values", name:"values", valueByStep:["[2, 4, 6]", "[2, 4, 6]", "[2, 4, 6]", "[2, 4, 6]", "[2, 4, 6]"] },
+            { id:"expanded", name:"expanded", valueByStep:["not created", "[2, 4, 6, 8]", "[2, 4, 6, 8]", "[2, 4, 6, 8]", "[2, 4, 6, 8]"] },
+            { id:"first", name:"first", valueByStep:["not collected", "not collected", "2", "2", "2"] },
+            { id:"remaining", name:"remaining", valueByStep:["not collected", "not collected", "[4, 6]", "[4, 6]", "[4, 6]"] },
+            { id:"head", name:"head", valueByStep:["not called", "not called", "not called", "2", "2"] },
+            { id:"tail", name:"tail", valueByStep:["not called", "not called", "not called", "[4, 6]", "[4, 6]"] }
+        ],
+        steps: [
+            {
+                id:0,
+                type:"source",
+                stage:"Source array",
+                line:1,
+                description:"The values array contains three items that can be expanded or collected."
+            },
+            {
+                id:1,
+                type:"spread",
+                stage:"Spread into a new array",
+                line:2,
+                description:"Spread expands each item from values, then appends 8 to create a new array."
+            },
+            {
+                id:2,
+                type:"rest-destructure",
+                stage:"Rest in destructuring",
+                line:3,
+                description:"The first item is assigned to first; rest collects the remaining items into remaining."
+            },
+            {
+                id:3,
+                type:"rest-parameter",
+                stage:"Spread call and rest parameter",
+                line:5,
+                description:"Spread passes the array items as arguments. The head parameter receives the first; rest collects the rest into tail."
+            },
+            {
+                id:4,
+                type:"console",
+                stage:"Results logged",
+                line:6,
+                description:"The expanded array, destructured remainder, and collected function arguments are logged together.",
+                output:"[2, 4, 6, 8] [4, 6] [2, [4, 6]]"
+            }
+        ]
     },
     {
         id:15,
@@ -1451,10 +1526,20 @@ const sum = (...values) => values.reduce((a, b) => a + b, 0);`,
         description:"Explore JavaScript modules through an interactive visualization. See how export and import share code between files, understand named and default exports, and visualize how modules organize large applications into reusable pieces.",
         difficulty:"Beginner",
         slug:'import-export',
-        component: GenericTopicLayout,
-        code: `export const value = 42;
-import { value } from './math.js';
-console.log(value);`,
+        component: ImportExportTopic,
+        code: `// math.js
+    export const value = 42;
+    export default function greet(name) {
+      return "Hello " + name;
+    }
+
+    // app.js
+    import greet, { value } from "./math.js";
+    console.log(greet("Aman"), value);`,
+        visualization: {
+            title:"Module exports and imports",
+            type:"module-flow"
+        },
         preview: {
             title:"Modules",
             summary:"import and export help share code across files and keep projects organized into modules.",
@@ -1463,16 +1548,83 @@ console.log(value);`,
         },
         conceptData: {
             title:"Modules in JavaScript",
-            summary:"Modules let code live in separate files and selectively expose or consume functionality.",
+            summary:"An exporting module exposes selected values, and an importing module brings them into scope. Named and default exports use different import syntax.",
             cards:[
-                { title:"export", description:"Declare which values can be used outside the file." },
-                { title:"import", description:"Bring values into another module." },
-                { title:"Structure", description:"Helps organize large projects into clear boundaries." }
+                {
+                    title:"Named exports",
+                    description:"A module can provide multiple named exports. Import them by name inside braces; aliases can rename them locally.",
+                    snippet:`// math.js
+export const value = 42;
+
+// app.js
+import { value } from "./math.js";
+import { value as answer } from "./math.js";`
+                },
+                {
+                    title:"Default export",
+                    description:"A module may have one default export. The importer chooses its local name and does not use braces.",
+                    snippet:`// greet.js
+export default function greet(name) {
+  return "Hello " + name;
+}
+
+// app.js
+import greet from "./greet.js";`
+                },
+                {
+                    title:"Import both forms",
+                    description:"A module can expose named and default exports together. Static imports belong at module scope.",
+                    snippet:`// app.js
+import greet, { value } from "./math.js";
+
+console.log(greet("Aman"), value);`
+                }
             ],
-            takeaways:["split code into files", "named/default export styles", "nice for scaling apps"]
+            takeaways:["exports define a module's public values", "named imports use braces", "default imports do not use braces"]
         },
-        variables:[],
-        steps:[]
+        variables: [
+            { id:"value", name:"value", valueByStep:["42", "42", "42", "42", "42"] },
+            { id:"greet", name:"greet", valueByStep:["not exported", "function greet(name)", "function greet(name)", "function greet(name)", "function greet(name)"] },
+            { id:"imports", name:"imports", valueByStep:["not imported", "not imported", "not imported", "greet, value", "greet, value"] }
+        ],
+        steps: [
+            {
+                id:0,
+                type:"named-export",
+                stage:"Named export created",
+                line:2,
+                description:"math.js exposes value as a named export."
+            },
+            {
+                id:1,
+                type:"default-export",
+                stage:"Default export created",
+                line:3,
+                description:"math.js exposes greet as its default export."
+            },
+            {
+                id:2,
+                type:"import",
+                stage:"Values imported",
+                line:8,
+                description:"app.js imports the default greet function and the named value export."
+            },
+            {
+                id:3,
+                type:"call",
+                stage:"Imported function called",
+                line:9,
+                description:"The importing module calls greet with Aman and reads the imported value."
+            },
+            {
+                id:4,
+                type:"console",
+                stage:"Module values used",
+                line:9,
+                output:"Hello Aman, 42",
+                description:"The imported function returns Hello Aman, and the named export supplies 42."
+            }
+        ]
     },
     {
         id:16,
@@ -1542,10 +1694,16 @@ const even = nums.filter((n) => n % 2 === 0);`,
         description:"Explore JavaScript type coercion through an interactive visualization. See how JavaScript automatically converts values between strings, numbers, and booleans during operations and comparisons, and understand the difference between implicit and explicit conversion.",
         difficulty:"Beginner",
         slug:'type-coercion',
-        component: GenericTopicLayout,
-        code: `console.log("5" + 2);
-console.log("5" - 2);
-console.log(Boolean("false"));`,
+        component: TypeCoercionTopic,
+        code: `const joined = "5" + 2;
+    const difference = "5" - 2;
+    const isTruthy = Boolean("false");
+    const explicitNumber = Number("5");
+    console.log(joined, difference, isTruthy, explicitNumber);`,
+        visualization: {
+            title:"Coercion by operator",
+            type:"type-coercion"
+        },
         preview: {
             title:"Type coercion",
             summary:"Type coercion is JavaScript’s automatic conversion between types during operations.",
@@ -1553,17 +1711,94 @@ console.log(Boolean("false"));`,
             keyPoints:["Implicit conversion", "String vs number behavior", "Use strict comparisons when needed"]
         },
         conceptData: {
-            title:"Implicit conversion",
-            summary:"JavaScript often converts values automatically so operators can do their work, but this can lead to surprising results.",
+            title:"Implicit and explicit conversion",
+            summary:"Operators and conditions can convert values implicitly. Number(), String(), and Boolean() make conversion explicit. The result depends on the operation and the value being converted.",
             cards:[
-                { title:"Strings", description:"+ concatenates values into a string." },
-                { title:"Numbers", description:"- and arithmetic try to convert values to numeric form." },
-                { title:"Booleans", description:"Falsy and truthy checks also rely on coercion." }
+                {
+                    title:"String concatenation",
+                    description:"When + receives a string, it converts the other operand to a string and concatenates.",
+                    snippet:`const result = "5" + 2;
+console.log(result); // "52"`
+                },
+                {
+                    title:"Numeric conversion",
+                    description:"Subtraction and other arithmetic operators convert numeric strings to numbers before calculating.",
+                    snippet:`const result = "5" - 2;
+console.log(result); // 3`
+                },
+                {
+                    title:"Truthy and falsy values",
+                    description:"A non-empty string is truthy, even when its text is \"false\". Boolean() makes the conversion explicit.",
+                    snippet:`console.log(Boolean("false")); // true
+console.log(Boolean(""));      // false`
+                },
+                {
+                    title:"Explicit conversion",
+                    description:"Conversion functions show the intended type change directly in the code.",
+                    snippet:`const count = Number("5");
+const label = String(5);
+console.log(count, label); // 5 "5"`
+                },
+                {
+                    title:"Loose vs strict equality",
+                    description:"Loose equality may coerce operands before comparing; strict equality compares without type conversion.",
+                    snippet:`console.log("5" == 5);  // true
+console.log("5" === 5); // false`
+                }
             ],
-            takeaways:["operators trigger conversion", "results can be surprising", "strict checks avoid confusion"]
+            takeaways:["+ may concatenate while arithmetic converts to numbers", "non-empty strings are truthy", "prefer explicit conversion and strict equality when intent matters"]
         },
         variables:[],
-        steps:[]
+        steps: [
+            {
+                id:0,
+                type:"coercion",
+                stage:"String concatenation",
+                line:1,
+                expression:"\"5\" + 2",
+                conversion:"number 2 -> string \"2\"",
+                output:"\"52\"",
+                description:"With + and a string operand, JavaScript converts the number to a string and concatenates."
+            },
+            {
+                id:1,
+                type:"coercion",
+                stage:"Numeric subtraction",
+                line:2,
+                expression:"\"5\" - 2",
+                conversion:"string \"5\" -> number 5",
+                output:"3",
+                description:"Subtraction converts the numeric string to a number, then calculates 5 - 2."
+            },
+            {
+                id:2,
+                type:"coercion",
+                stage:"Boolean conversion",
+                line:3,
+                expression:"Boolean(\"false\")",
+                conversion:"non-empty string -> truthy",
+                output:"true",
+                description:"The string contains the word false, but it is non-empty, so its Boolean value is true."
+            },
+            {
+                id:3,
+                type:"coercion",
+                stage:"Explicit number conversion",
+                line:4,
+                expression:"Number(\"5\")",
+                conversion:"string \"5\" -> number 5",
+                output:"5",
+                description:"Number() explicitly converts the numeric string into the number 5."
+            },
+            {
+                id:4,
+                type:"console",
+                stage:"Results logged",
+                line:5,
+                output:"\"52\", 3, true, 5",
+                description:"The logged values show the result of each implicit or explicit conversion."
+            }
+        ]
     },
     {
         id:19,
