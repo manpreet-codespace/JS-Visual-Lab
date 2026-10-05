@@ -13,7 +13,8 @@ export default function FunctionExpressionHoisting() {
             </p>
 
             <div className="rounded-2xl border border-white/10 bg-[#0b1220] p-4 font-mono text-sm leading-6 text-sky-200">
-                <pre>{`const sayHello = function () {
+                <pre>{`console.log(sayHello());
+const sayHello = function () {
   return "Hi";
 };
 console.log(sayHello());`}</pre>
@@ -23,6 +24,7 @@ console.log(sayHello());`}</pre>
                 <li>• The variable is hoisted.</li>
                 <li>• The function value is assigned later.</li>
                 <li>• Calling it too early can fail.</li>
+                <li>• Treats the function as a value assigned to a variable.</li>
             </ul>
         </div>
     );

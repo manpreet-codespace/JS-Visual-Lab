@@ -1,7 +1,7 @@
 export default function VisualizationPanel({title, children}){
     return(
     <>
-    <div className="w-5/12 rounded-lg border border-gray-700 bg-[var(--bg)] relative z-40">
+    <div className="w-full rounded-lg border border-gray-700 bg-[var(--bg)] relative z-40">
       
       {/* Header */}
       <div className="border-b border-gray-700 px-4 py-3">

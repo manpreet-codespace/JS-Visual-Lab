@@ -7,7 +7,7 @@ export default function CodeEditor({ activeLine, code, onCodeChange }) {
     const lineCount = Math.max((code ?? "").split("\n").length, 1);
 
     return (
-        <div className="relative z-40 w-full overflow-hidden rounded-[24px] border border-white/10 bg-[#0b1220]/90 shadow-[0_20px_50px_rgba(15,23,42,0.45)] backdrop-blur-sm md:w-[55%]">
+        <div className="relative z-40 w-full overflow-hidden rounded-[24px] border border-white/10 bg-[#0b1220]/90 shadow-[0_20px_50px_rgba(15,23,42,0.45)] backdrop-blur-sm ">
             <div className="flex items-center justify-between border-b border-white/10 bg-slate-950/70 px-4 py-3">
                 <div className="flex items-center gap-2">
                     <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]" />
@@ -18,7 +18,7 @@ export default function CodeEditor({ activeLine, code, onCodeChange }) {
                 </span>
             </div>
 
-            <div className="flex h-[340px] overflow-hidden bg-[#0b1220]">
+            <div className="flex h-[240px] overflow-hidden bg-[#0b1220]">
                 <div className="w-12 shrink-0 border-r border-white/10 bg-slate-950/70 px-2 py-4 text-right text-[11px] font-medium text-slate-500">
                     {Array.from({ length: lineCount }).map((_, index) => {
                         const lineNumber = index + 1;

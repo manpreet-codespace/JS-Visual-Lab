@@ -32,43 +32,47 @@ const subtopicComponents = {
 export default function Hoisting({ topicData }) {
     const [currentStep, setCurrentStep] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
-    const [code, setCode] = useState(topicData.code ?? "");
 
     const timerRef = useRef(null);
-    const step = topicData.steps[currentStep];
-    const isLastStep = currentStep >= topicData.steps.length - 1;
     const subtopics = topicData.subtopics ?? [];
     const [activeSubtopic, setActiveSubtopic] = useState(subtopics[0]?.id ?? "var");
     const activeSubtopicData = subtopics.find((item) => item.id === activeSubtopic) ?? subtopics[0] ?? null;
+    const [code, setCode] = useState(activeSubtopicData?.code ?? topicData.code ?? "");
+    const activeSteps = activeSubtopicData?.steps ?? topicData.steps ?? [];
+    const activeVariables = activeSubtopicData?.variables ?? topicData.variables ?? [];
+    const step = activeSteps[currentStep];
+    const isLastStep = currentStep >= activeSteps.length - 1;
     const ActiveSubtopicComponent = subtopicComponents[activeSubtopic] ?? null;
 
-    const consoleOutputs = topicData.steps
+    const consoleOutputs = activeSteps
         .slice(0, currentStep + 1)
         .filter((stepItem) => stepItem.type === "console")
         .map((stepItem) => {
-            const variable = topicData.variables.find((item) => item.id === stepItem.variableId);
-            return variable;
+            const variable = activeVariables.find((item) => item.id === stepItem.variableId);
+            return variable
+                ? { ...variable, id: stepItem.id, consoleValue: stepItem.output ?? variable.consoleValue }
+                : null;
         })
         .filter(Boolean);
 
     useEffect(() => {
-        if (!isRunning) return;
-
-        if (currentStep >= topicData.steps.length - 1) {
-            setIsRunning(false);
-            return;
-        }
+        if (!isRunning || currentStep >= activeSteps.length - 1) return;
 
         timerRef.current = setTimeout(() => {
-            setCurrentStep((prev) => Math.min(prev + 1, topicData.steps.length - 1));
+            const nextStep = Math.min(currentStep + 1, activeSteps.length - 1);
+            setCurrentStep(nextStep);
+
+            if (nextStep >= activeSteps.length - 1) {
+                setIsRunning(false);
+            }
         }, 2000);
 
         return () => clearTimeout(timerRef.current);
-    }, [isRunning, currentStep, topicData.steps.length]);
+    }, [isRunning, currentStep, activeSteps.length]);
 
     const handleNext = () => {
         setCurrentStep((prev) => {
-            if (prev >= topicData.steps.length - 1) {
+            if (prev >= activeSteps.length - 1) {
                 return prev;
             }
 
@@ -85,7 +89,15 @@ export default function Hoisting({ topicData }) {
     const handleRun = () => {
         clearTimeout(timerRef.current);
         setCurrentStep(0);
-        setIsRunning(true);
+        setIsRunning(activeSteps.length > 1);
+    };
+
+    const handleSubtopicChange = (item) => {
+        clearTimeout(timerRef.current);
+        setIsRunning(false);
+        setCurrentStep(0);
+        setCode(item.code ?? topicData.code ?? "");
+        setActiveSubtopic(item.id);
     };
 
     const actions = [
@@ -104,7 +116,7 @@ export default function Hoisting({ topicData }) {
                         <button
                             key={item.id}
                             type="button"
-                            onClick={() => setActiveSubtopic(item.id)}
+                            onClick={() => handleSubtopicChange(item)}
                             className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${
                                 activeSubtopic === item.id
                                     ? subtopicStyles[item.id] ?? "border-violet-400/40 bg-violet-500/10 text-violet-200"
@@ -120,34 +132,26 @@ export default function Hoisting({ topicData }) {
             <div className="flex flex-wrap gap-6">
                 <CodeEditor
                     activeLine={step?.line ?? null}
-                    code={activeSubtopicData?.code ?? code}
+                    code={code}
                     onCodeChange={setCode}
                 />
 
                 <VisualizationPanel title={activeSubtopicData?.visualization?.title ?? "Hoisting Timeline"}>
-                    {ActiveSubtopicComponent ? (
-                        <ActiveSubtopicComponent />
-                    ) : (
-                        <>
-                            <div className="flex items-center justify-center">
-                                {step?.type === "memory" && (
-                                    <MemoryCreationPhase variables={topicData.variables} />
-                                )}
-                            </div>
+                    <div className="space-y-6">
+                        {step?.type === "memory" && (
+                            <MemoryCreationPhase variables={activeVariables} />
+                        )}
 
-                            <div className="flex items-center justify-center">
-                                {step?.type === "execution" && (
-                                    <ExecutionPhase variables={topicData.variables} currentVariableId={step.variableId} />
-                                )}
-                            </div>
+                        {step?.type === "execution" && (
+                            <ExecutionPhase variables={activeVariables} currentVariableId={step.variableId} />
+                        )}
 
-                            <div className="flex items-center justify-center">
-                                {step?.type === "console" && (
-                                    <ConsolePanel variables={consoleOutputs} />
-                                )}
-                            </div>
-                        </>
-                    )}
+                        {step?.type === "console" && (
+                            <ConsolePanel variables={consoleOutputs} />
+                        )}
+
+                        {ActiveSubtopicComponent && <ActiveSubtopicComponent />}
+                    </div>
                 </VisualizationPanel>
             </div>
         </div>

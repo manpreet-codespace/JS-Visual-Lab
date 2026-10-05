@@ -14,7 +14,8 @@ export default function VarHoisting() {
 
             <div className="rounded-2xl border border-white/10 bg-[#0b1220] p-4 font-mono text-sm leading-6 text-sky-200">
                 <pre>{`console.log(name); // undefined
-var name = "Aman";`}</pre>
+var name = "Aman";
+console.log(name); //Aman`}</pre>
             </div>
 
             <ul className="space-y-2 text-sm text-slate-300">

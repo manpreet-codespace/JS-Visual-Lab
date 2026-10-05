@@ -131,7 +131,7 @@ export default function ExecutionContext({ topicData }) {
 
             <ControlBar actions={actions} />
 
-            <div className="flex flex-wrap gap-6">
+            <div className="flex flex-col flex-wrap gap-6">
                 <CodeEditor activeLine={step?.line ?? null} code={code} onCodeChange={setCode} />
 
                 <VisualizationPanel title="Execution Context">

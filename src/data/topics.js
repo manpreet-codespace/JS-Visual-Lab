@@ -1,5 +1,10 @@
 import ExecutionContext from "@/components/topics/ExecutionContext/ExecutionContext";
 import Hoisting from "@/components/topics/Hoisting/Hoisting";
+import Closure from "@/components/topics/Closure/Closure";
+import Callback from "@/components/topics/Callback/Callback";
+import ThisTopic from "@/components/topics/ThisTopic/ThisTopic";
+import FunctionsTopic from "@/components/topics/Functions/FunctionsTopic";
+import CopyTopic from "@/components/topics/CopyTopic/CopyTopic";
 import GenericTopicLayout from "@/components/topics/GenericTopicLayout";
 import VarHoisting from "@/components/topics/Hoisting/VarHoisting";
 import LetHoisting from "@/components/topics/Hoisting/LetHoisting";
@@ -178,6 +183,7 @@ let age = 24;`,
                 summary: "var is hoisted and initialized to undefined.",
                 code: `console.log(name); // undefined
 var name = "Aman";`,
+
                 editor: {
                     title: "var hoisting demo",
                     language: "javascript"
@@ -189,7 +195,7 @@ var name = "Aman";`,
                 preview: {
                     title: "var",
                     summary: "The variable exists in memory before assignment, so it reads as undefined.",
-                    snippet: `console.log(name); // undefined\nvar name = "Aman";`,
+                    snippet: `console.log(name); // undefined\nvar name = "Aman";\nconsole.log(name) \\Aman`,
                     keyPoints: ["Function-scoped", "Hoisted with undefined", "Available before assignment"]
                 },
                 conceptData: {
@@ -212,17 +218,18 @@ var name = "Aman";`,
                     }
                 ],
                 steps: [
-                    { id: 0, type: "memory", line: 1, variableId: 1, description: "var name is hoisted and assigned undefined in memory." },
-                    { id: 1, type: "execution", line: 2, variableId: 1, description: "The assignment happens during execution." },
-                    { id: 2, type: "console", line: 3, variableId: 1, description: "Logging before assignment prints undefined." }
+                    { id: 0, type: "memory", line: 2, variableId: 1, description: "var name is hoisted and assigned undefined in memory." },
+                    { id: 1, type: "console", line: 1, variableId: 1, output: "undefined", description: "Logging before assignment prints undefined." },
+                    { id: 2, type: "execution", line: 2, variableId: 1, description: "The assignment happens during execution." }
                 ]
             },
             {
                 id: "let",
                 title: "let",
                 summary: "let is hoisted, but remains in the Temporal Dead Zone until initialization.",
-                code: `console.log(age); // ReferenceError
-let age = 24;`,
+                code: `console.log(age);
+let age = 24;
+console.log(age)`,
                 editor: {
                     title: "let hoisting demo",
                     language: "javascript"
@@ -257,17 +264,19 @@ let age = 24;`,
                     }
                 ],
                 steps: [
-                    { id: 0, type: "memory", line: 1, variableId: 1, description: "let age is hoisted but remains in TDZ." },
-                    { id: 1, type: "console", line: 2, variableId: 1, description: "Access before initialization throws ReferenceError." },
-                    { id: 2, type: "execution", line: 3, variableId: 1, description: "After declaration, age is assigned the value 24." }
+                    { id: 0, type: "memory", line: 6, variableId: 1, description: "let age is hoisted but remains in TDZ." },
+                    { id: 1, type: "console", line: 4, variableId: 1, output: "ReferenceError", description: "The early access throws a ReferenceError" },
+                    { id: 2, type: "execution", line: 6, variableId: 1, description: "After the caught error, age is initialized to 24." },
+                    { id: 3, type: "console", line: 7, variableId: 1, output: "24", description: "After initialization, reading age returns 24." }
                 ]
             },
             {
                 id: "const",
                 title: "const",
                 summary: "const follows the same hoisting pattern as let, but it must be initialized immediately.",
-                code: `console.log(status); // ReferenceError
-const status = "ready";`,
+                code: `console.log(status);
+const status = "ready";
+console.log(status);`,
                 editor: {
                     title: "const hoisting demo",
                     language: "javascript"
@@ -302,9 +311,10 @@ const status = "ready";`,
                     }
                 ],
                 steps: [
-                    { id: 0, type: "memory", line: 1, variableId: 1, description: "const status is hoisted into TDZ." },
-                    { id: 1, type: "console", line: 2, variableId: 1, description: "Access before initialization throws a ReferenceError." },
-                    { id: 2, type: "execution", line: 3, variableId: 1, description: "status receives the value ready after declaration." }
+                    { id: 0, type: "memory", line: 6, variableId: 1, description: "const status is hoisted into TDZ." },
+                    { id: 1, type: "console", line: 4, variableId: 1, output: "ReferenceError", description: "The early access throws a ReferenceError" },
+                    { id: 2, type: "execution", line: 6, variableId: 1, description: "After the caught error, status is initialized to ready." },
+                    { id: 3, type: "console", line: 7, variableId: 1, output: "ready", description: "After initialization, reading status returns ready." }
                 ]
             },
             {
@@ -349,16 +359,17 @@ function greet() {
                     }
                 ],
                 steps: [
-                    { id: 0, type: "memory", line: 1, variableId: 1, description: "The function declaration is loaded into memory during creation." },
-                    { id: 1, type: "execution", line: 2, variableId: 1, description: "The function call executes normally." },
-                    { id: 2, type: "console", line: 3, variableId: 1, description: "The function returns Hi, which is printed to the console." }
+                    { id: 0, type: "memory", line: 2, variableId: 1, description: "The function declaration is loaded into memory during creation." },
+                    { id: 1, type: "execution", line: 1, variableId: 1, description: "The function call executes before the declaration appears." },
+                    { id: 2, type: "console", line: 1, variableId: 1, output: "Hi", description: "The function returns Hi, which is printed to the console." }
                 ]
             },
             {
                 id: "function-expression",
                 title: "Function Expression",
                 summary: "Function expressions are assigned to variables, so only the variable is hoisted, not the function value.",
-                code: `const sayHello = function () {
+                code: `console.log(sayHello());
+const sayHello = function () {
   return "Hi";
 };
 console.log(sayHello());`,
@@ -397,8 +408,9 @@ console.log(sayHello());`,
                 ],
                 steps: [
                     { id: 0, type: "memory", line: 1, variableId: 1, description: "sayHello is created as a binding, but no function value is assigned yet." },
-                    { id: 1, type: "execution", line: 2, variableId: 1, description: "The function expression is assigned to sayHello." },
-                    { id: 2, type: "console", line: 3, variableId: 1, description: "The function is called and returns Hi." }
+                    { id: 0, type: "console", line: 1, variableId: 1,output: "ReferenceError", description: "The early access throws a ReferenceError" },
+                    { id: 1, type: "execution", line: 1, variableId: 1, description: "The function expression is assigned to sayHello." },
+                    { id: 2, type: "console", line: 4, variableId: 1, output: "Hi", description: "The function is called and returns Hi." }
                 ]
             }
         ],
@@ -546,16 +558,21 @@ console.log(sayHello());`,
         description:"Explore JavaScript closures through an interactive visualization. See how lexical scope allows inner functions to retain access to outer variables, preserve state, and access their surrounding environment even after execution ends.",
         difficulty:"Intermediate",
         slug:"closure",
-        component: GenericTopicLayout,
+                component: Closure,
         code: `function counter() {
   let count = 0;
-  return function () {
+    return function increment() {
     count += 1;
     return count;
   };
 }
 const next = counter();
+console.log(next());
 console.log(next());`,
+                visualization: {
+                        title: "Closure lifecycle",
+                        type: "closure"
+                },
         preview: {
             title:"Closure Overview",
             summary:"A closure keeps access to an outer function's variables even after that outer function has finished running.",
@@ -575,8 +592,94 @@ console.log(next());`,
             ],
             takeaways:["variables survive return", "state can persist", "common in data privacy patterns"]
         },
-        variables:[],
-        steps:[]
+        variables: [
+            {
+                id: "counter",
+                name: "counter",
+                scope: "Global scope",
+                valueByStep: Array(7).fill("function counter() { ... }")
+            },
+            {
+                id: "next",
+                name: "next",
+                scope: "Global scope",
+                valueByStep: [
+                    "not initialized",
+                    "not initialized",
+                    "not initialized",
+                    "not initialized",
+                    "increment function",
+                    "increment function",
+                    "increment function"
+                ]
+            },
+            {
+                id: "count",
+                name: "count",
+                scope: "counter lexical environment",
+                valueByStep: ["not created", "not created", "0", "0", "0", "1", "2"]
+            }
+        ],
+        steps: [
+            {
+                id: 0,
+                type: "memory",
+                stage: "Global declaration",
+                line: 1,
+                closureRetained: false,
+                description: "The global scope stores counter as a function declaration."
+            },
+            {
+                id: 1,
+                type: "execution",
+                stage: "Counter call",
+                line: 8,
+                closureRetained: false,
+                description: "Calling counter() creates a new function execution context."
+            },
+            {
+                id: 2,
+                type: "execution",
+                stage: "Lexical environment",
+                line: 2,
+                closureRetained: false,
+                description: "The counter call creates its local lexical environment and initializes count to 0."
+            },
+            {
+                id: 3,
+                type: "closure",
+                stage: "Closure created",
+                line: 3,
+                closureRetained: true,
+                description: "The returned increment function captures the count binding from the counter environment."
+            },
+            {
+                id: 4,
+                type: "execution",
+                stage: "Outer call returns",
+                line: 8,
+                closureRetained: true,
+                description: "counter() returns increment. Its call frame ends, but the captured lexical environment stays reachable through next."
+            },
+            {
+                id: 5,
+                type: "console",
+                stage: "First closure call",
+                line: 9,
+                closureRetained: true,
+                output: "1",
+                description: "next() updates the captured count from 0 to 1 and returns it."
+            },
+            {
+                id: 6,
+                type: "console",
+                stage: "Second closure call",
+                line: 10,
+                closureRetained: true,
+                output: "2",
+                description: "The same closure reuses its retained count, updates it to 2, and returns it."
+            }
+        ]
     },
     {
         id:3,
@@ -584,7 +687,7 @@ console.log(next());`,
         description:"Explore JavaScript callbacks through an interactive visualization. Watch how functions are passed as arguments and executed later, revealing how callback-based programming controls asynchronous tasks and execution flow.",
         difficulty:"Beginner",
         slug:"callback",
-        component: GenericTopicLayout,
+        component: Callback,
         code: `function greet(name, callback) {
   callback(name);
 }
@@ -606,12 +709,83 @@ greet("Aman", (value) => {
             cards:[
                 { title:"Function argument", description:"A callback is passed as a parameter instead of being executed immediately." },
                 { title:"Timing", description:"It runs when the host function decides to invoke it." },
-                { title:"Common use", description:"Callbacks are often seen in events, arrays, and asynchronous APIs." }
+                { title:"Common use", description:"Callbacks are often seen in events, arrays, and asynchronous APIs." },
+                { title:"Callback hell", description:"Deeply nesting callbacks can create a hard-to-follow pyramid, complicate error handling, and make logic harder to reuse. Named functions, Promises, or async/await can flatten the flow." }
             ],
-            takeaways:["passed as function argument", "runs later", "drives event-driven logic"]
+            takeaways:["passed as function argument", "runs when invoked by its caller", "nested callbacks can become hard to maintain"]
         },
-        variables:[],
-        steps:[]
+        variables: [
+            {
+                id: "name",
+                name: "name",
+                scope: "greet()",
+                valueByStep: ["not created", "Aman passed", "Aman", "Aman", "Aman", "Aman", "Aman"]
+            },
+            {
+                id: "callback",
+                name: "callback",
+                scope: "greet()",
+                valueByStep: ["not created", "inline function passed", "inline function", "inline function", "running", "completed", "completed"]
+            },
+            {
+                id: "value",
+                name: "value",
+                scope: "callback body",
+                valueByStep: ["not created", "not created", "not created", "not created", "Aman", "Aman", "Aman"]
+            }
+        ],
+        steps: [
+            {
+                id: 0,
+                type: "definition",
+                stage: "Function declared",
+                line: 1,
+                description: "greet is defined with two parameters: a name and a callback function."
+            },
+            {
+                id: 1,
+                type: "call",
+                stage: "greet called",
+                line: 5,
+                description: "The call supplies the string Aman and an inline arrow function."
+            },
+            {
+                id: 2,
+                type: "arguments",
+                stage: "Parameters assigned",
+                line: 5,
+                description: "Inside greet, name receives Aman and callback receives the arrow function."
+            },
+            {
+                id: 3,
+                type: "invoke",
+                stage: "Callback invoked",
+                line: 2,
+                description: "greet calls callback(name), passing Aman into the callback. This example runs synchronously."
+            },
+            {
+                id: 4,
+                type: "callback",
+                stage: "Callback receives value",
+                line: 6,
+                description: "The callback parameter value now contains Aman."
+            },
+            {
+                id: 5,
+                type: "console",
+                stage: "Output logged",
+                line: 7,
+                output: "Hello Aman",
+                description: "The callback combines Hello with value and writes the result to the console."
+            },
+            {
+                id: 6,
+                type: "complete",
+                stage: "Callback complete",
+                line: 3,
+                description: "The callback returns, then greet finishes."
+            }
+        ]
     },
     {
         id:4,
@@ -619,17 +793,26 @@ greet("Aman", (value) => {
         description:"Master JavaScript this, call(), apply(), and bind() through an interactive visualization. See how function context changes dynamically and understand how each method controls the value of this during function execution.",
         difficulty:"Intermediate",
         slug:'this',
-        component: GenericTopicLayout,
-        code: `const user = {
+                component: ThisTopic,
+                code: `"use strict";
+
+const user = {
   name: "Aman",
   greet() {
-    console.log(this.name);
+        console.log(this ? this.name : "undefined");
   }
 };
 
+// Method call: this is the object before the dot.
 user.greet();
-const fn = user.greet.bind({ name: "Raj" });
-fn();`,
+
+// Detached call in strict mode: this is undefined.
+const detachedGreet = user.greet;
+detachedGreet();`,
+                visualization: {
+                        title: "How this is determined",
+                        type: "this-binding"
+                },
         preview: {
             title:"The this keyword",
             summary:"this depends on how a function is called, not where it is defined.",
@@ -642,17 +825,74 @@ fn();`,
             keyPoints:["Context changes with call site", "bind sets exact context", "call/apply invoke with custom this"]
         },
         conceptData: {
-            title:"Understanding this",
-            summary:"The value of this is determined by the call pattern: method call, function call, constructor, or explicit binding.",
+            title:"Call-site rules for this",
+            summary:"In a regular function, this is determined by how the function is called. A method call supplies its owning object as the receiver; a detached strict-mode call has no receiver, so this is undefined.",
             cards:[
-                { title:"Method call", description:"this points to the object on the left side of the dot." },
-                { title:"Explicit binding", description:"call(), apply(), and bind() override the default context." },
-                { title:"Regular function", description:"Inside a plain function, this usually refers to the global object or undefined in strict mode." }
+                                {
+                                        title:"call()",
+                                        description:"Invokes the function immediately with the provided this value. Any remaining arguments are passed one by one.",
+                                        snippet:`function sayHi(greeting) {
+    console.log(greeting + " " + this.name);
+}
+
+sayHi.call({ name: "Aman" }, "Hi");`
+                                },
+                                {
+                                        title:"apply()",
+                                        description:"Invokes the function immediately with the provided this value. Its arguments are supplied together in an array-like value.",
+                                        snippet:`function sayHi(greeting) {
+    console.log(greeting + " " + this.name);
+}
+
+sayHi.apply({ name: "Aman" }, ["Hi"]);`
+                                },
+                                {
+                                        title:"bind()",
+                                        description:"Returns a new function with this fixed to the provided value. It does not invoke the function until that new function is called.",
+                                        snippet:`function sayHi(greeting) {
+    console.log(greeting + " " + this.name);
+}
+
+const greetAman = sayHi.bind({ name: "Aman" });
+greetAman("Hi");`
+                                }
             ],
-            takeaways:["context depends on invocation", "bind fixes the object", "call/apply invoke immediately"]
+            takeaways:["method calls take this from the receiver", "strict detached calls have undefined this", "call/apply invoke now; bind returns a function"]
         },
-        variables:[],
-        steps:[]
+        variables: [
+            {
+                id: "this",
+                name: "this",
+                valueByStep: ["user", "undefined (strict mode)"]
+            },
+            {
+                id: "receiver",
+                name: "receiver",
+                valueByStep: ["user object", "none"]
+            }
+        ],
+        steps: [
+            {
+                id: 0,
+                type: "method-call",
+                stage: "Method call",
+                line: 11,
+                description: "user.greet() is called as a method, so the object before the dot becomes this.",
+                receiver: "user",
+                thisValue: "user",
+                output: "Aman"
+            },
+            {
+                id: 1,
+                type: "plain-call",
+                stage: "Detached function call",
+                line: 15,
+                description: "detachedGreet() has no receiver. Because this code is strict, this is undefined.",
+                receiver: "none",
+                thisValue: "undefined (strict mode)",
+                output: "undefined"
+            }
+        ]
     },
     {
         id:5,
@@ -757,11 +997,16 @@ Promise.resolve().then(() => console.log("microtask"));`,
         description:"Explore JavaScript functions through an interactive visualization. See how function declarations, parameters, arguments, return values, and function calls work together to control reusable blocks of code and execution flow.",
         difficulty:"Beginner",
         slug:'functions',
-        component: GenericTopicLayout,
-        code: `function add(a, b) {
-  return a + b;
+                component: FunctionsTopic,
+                code: `function add(first, second) {
+    return first + second;
 }
-console.log(add(2, 3));`,
+const total = add(2, 3);
+console.log(total);`,
+                visualization: {
+                        title: "Function call and return",
+                        type: "function-call"
+                },
         preview: {
             title:"Functions",
             summary:"Functions let you group reusable logic and execute it by passing arguments and receiving a return value.",
@@ -771,28 +1016,163 @@ console.log(add(2, 3));`,
             keyPoints:["Parameters", "Arguments", "Return values"]
         },
         conceptData: {
-            title:"Function fundamentals",
-            summary:"Functions create reusable blocks of code that can accept inputs, perform work, and return output.",
+            title:"Function types and patterns",
+            summary:"JavaScript functions appear in several forms and patterns. Some describe syntax, such as declarations and arrows; others describe how functions are used, such as callbacks and higher-order functions.",
             cards:[
-                { title:"Declaration", description:"A function can be declared once and called many times." },
-                { title:"Arguments", description:"Values passed into parameters control runtime behavior." },
-                { title:"Return", description:"A function can send a result back to the caller." }
+                {
+                    title:"Function declaration",
+                    description:"A named function declared with the function keyword. Declarations are available throughout their scope after initialization.",
+                    snippet:`function greet(name) {
+  return "Hello " + name;
+}`
+                },
+                {
+                    title:"Named function expression",
+                    description:"A function expression with an internal name, useful for recursion and stack traces.",
+                    snippet:`const factorial = function calculate(number) {
+  if (number <= 1) return 1;
+  return number * calculate(number - 1);
+};`
+                },
+                {
+                    title:"Anonymous function expression",
+                    description:"A function created as an expression without its own name, often assigned to a variable or passed as a value.",
+                    snippet:`const double = function (number) {
+  return number * 2;
+};`
+                },
+                {
+                    title:"Arrow function",
+                    description:"A concise function expression with lexical this. Arrow functions do not have their own this or arguments binding.",
+                    snippet:`const double = (number) => number * 2;
+const add = (first, second) => first + second;`
+                },
+                {
+                    title:"Method",
+                    description:"A function stored as an object property. In a method call, this is set by the object used as the receiver.",
+                    snippet:`const user = {
+  name: "Aman",
+  greet() {
+    return "Hello " + this.name;
+  }
+};`
+                },
+                {
+                    title:"IIFE",
+                    description:"An immediately invoked function expression runs as soon as it is created and can create a local scope.",
+                    snippet:`(function () {
+  const message = "initialized";
+  console.log(message);
+})();`
+                },
+                {
+                    title:"Callback function",
+                    description:"A function passed to another function and invoked by that function at the appropriate point.",
+                    snippet:`function greet(name, callback) {
+  callback("Hello " + name);
+}
+
+greet("Aman", (message) => console.log(message));`
+                },
+                {
+                    title:"Higher-order function",
+                    description:"A function that accepts another function, returns a function, or does both.",
+                    snippet:`function makeMultiplier(factor) {
+  return (number) => number * factor;
+}
+
+const triple = makeMultiplier(3);`
+                },
+                {
+                    title:"Constructor function",
+                    description:"A regular function called with new to initialize a new object. Classes are the modern syntax for this pattern.",
+                    snippet:`function User(name) {
+  this.name = name;
+}
+
+const user = new User("Aman");`
+                },
+                {
+                    title:"Generator function",
+                    description:"A function declared with function* that can pause at yield and resume through its iterator.",
+                    snippet:`function* createIds() {
+  yield 1;
+  yield 2;
+}
+
+const ids = createIds();`
+                },
+                {
+                    title:"Async function",
+                    description:"An async function always returns a Promise and can use await to write asynchronous steps sequentially.",
+                    snippet:`async function loadName() {
+  return "Aman";
+}
+
+loadName().then(console.log);`
+                }
             ],
-            takeaways:["code reuse", "inputs and outputs", "calls can happen many times"]
+            takeaways:["functions are values that can be passed around", "parameters receive arguments at call time", "functions can return values or other functions"]
         },
-        variables:[],
-        steps:[]
+        variables: [
+            { id: "first", name: "first", valueByStep: ["not called", "2", "2", "2"] },
+            { id: "second", name: "second", valueByStep: ["not called", "3", "3", "3"] },
+            { id: "total", name: "total", valueByStep: ["not initialized", "not initialized", "5", "5"] }
+        ],
+        steps: [
+            {
+                id: 0,
+                type: "definition",
+                stage: "Function defined",
+                line: 1,
+                description: "The add declaration defines reusable logic with two parameters."
+            },
+            {
+                id: 1,
+                type: "call",
+                stage: "Function called",
+                line: 4,
+                description: "Calling add(2, 3) creates a function execution and passes two arguments."
+            },
+            {
+                id: 2,
+                type: "return",
+                stage: "Value returned",
+                line: 2,
+                description: "The parameters are added, and the function returns 5 to the caller.",
+                output: "5"
+            },
+            {
+                id: 3,
+                type: "console",
+                stage: "Result logged",
+                line: 5,
+                description: "The returned value is stored in total and logged.",
+                output: "5"
+            }
+        ]
     },
     {
         id:9,
         topic:"Shallow copy vs Deep copy",
-        description:"Explore JavaScript shallow and deep copying through an interactive visualization. See how object references are shared or duplicated, and understand how nested objects behave when you modify copied data.",
+        description:"Compare shallow and deep copies by tracking object references and nested data as each copy is mutated.",
         difficulty:"Intermediate",
         slug:'shallow-deep-copy',
-        component: GenericTopicLayout,
-        code: `const person = { name: "Aman", profile: { city: "Delhi" } };
-const shallow = { ...person };
-const deep = JSON.parse(JSON.stringify(person));`,
+        component: CopyTopic,
+        code: `const original = { name: "Aman", profile: { city: "Delhi" } };
+    const shallowCopy = { ...original };
+    const deepCopy = structuredClone(original);
+
+    shallowCopy.profile.city = "Mumbai";
+    deepCopy.profile.city = "Pune";
+
+    console.log(original.profile.city);
+    console.log(shallowCopy.profile.city);
+    console.log(deepCopy.profile.city);`,
+        visualization: {
+            title: "Nested object references",
+            type: "copy-comparison"
+        },
         preview: {
             title:"Shallow vs deep copy",
             summary:"A shallow copy duplicates the top level only, while a deep copy duplicates nested objects as well.",
@@ -801,17 +1181,114 @@ const deep = JSON.parse(JSON.stringify(person));`,
             keyPoints:["Top-level only", "Nested references preserved", "Deep copy duplicates nested data"]
         },
         conceptData: {
-            title:"Copying objects",
-            summary:"Shallow copies duplicate the outer structure, but nested objects still share references. Deep copies duplicate everything recursively.",
+            title:"Shallow copy and deep copy",
+            summary:"Copy depth determines whether nested objects are shared. A shallow copy creates a new outer object but keeps nested references; a deep copy creates independent nested objects too.",
             cards:[
-                { title:"Shallow", description:"Only the first level is copied." },
-                { title:"Deep", description:"Nested objects are cloned too." },
-                { title:"Risk", description:"Avoid mutating shared nested state without a deep copy." }
+                {
+                    title:"Shallow copy",
+                    description:"Creates a new top-level object. Nested objects remain shared references, so changing a nested property through the copy also changes the original.",
+                    snippet:`const original = { profile: { city: "Delhi" } };
+const copy = { ...original };
+
+copy.profile.city = "Mumbai";
+console.log(original.profile.city); // Mumbai`
+                },
+                {
+                    title:"Deep copy",
+                    description:"Recursively duplicates nested data so mutations do not affect the original. structuredClone supports common built-in data types and circular references; functions and some host objects cannot be cloned.",
+                    snippet:`const original = { profile: { city: "Delhi" } };
+const copy = structuredClone(original);
+
+copy.profile.city = "Mumbai";
+console.log(original.profile.city); // Delhi`
+                }
             ],
-            takeaways:["top-level copy is shallow", "nested data may still be shared", "deep copy prevents shared nested mutations"]
+            takeaways:["spread and Object.assign make shallow copies", "nested references decide whether mutations are shared", "use structuredClone when an independent nested copy is needed"]
         },
-        variables:[],
-        steps:[]
+        variables: [
+            {
+                id: "original",
+                name: "original",
+                objectRefByStep: Array(8).fill("object-1"),
+                profileRefByStep: Array(8).fill("profile-1"),
+                cityByStep: ["Delhi", "Delhi", "Delhi", "Mumbai", "Mumbai", "Mumbai", "Mumbai", "Mumbai"]
+            },
+            {
+                id: "shallowCopy",
+                name: "shallowCopy",
+                objectRefByStep: ["not created", "object-2", "object-2", "object-2", "object-2", "object-2", "object-2", "object-2"],
+                profileRefByStep: ["not created", "profile-1", "profile-1", "profile-1", "profile-1", "profile-1", "profile-1", "profile-1"],
+                cityByStep: ["not created", "Delhi", "Delhi", "Mumbai", "Mumbai", "Mumbai", "Mumbai", "Mumbai"]
+            },
+            {
+                id: "deepCopy",
+                name: "deepCopy",
+                objectRefByStep: ["not created", "not created", "object-3", "object-3", "object-3", "object-3", "object-3", "object-3"],
+                profileRefByStep: ["not created", "not created", "profile-2", "profile-2", "profile-2", "profile-2", "profile-2", "profile-2"],
+                cityByStep: ["not created", "not created", "Delhi", "Delhi", "Pune", "Pune", "Pune", "Pune"]
+            }
+        ],
+        steps: [
+            {
+                id: 0,
+                type: "create",
+                stage: "Original object created",
+                line: 1,
+                description: "The original object and its nested profile are stored at separate reference locations."
+            },
+            {
+                id: 1,
+                type: "shallow-copy",
+                stage: "Shallow copy created",
+                line: 2,
+                description: "Spread creates a new outer object, but profile still points to the original nested object."
+            },
+            {
+                id: 2,
+                type: "deep-copy",
+                stage: "Deep copy created",
+                line: 3,
+                description: "structuredClone creates a new outer object and a separate nested profile object."
+            },
+            {
+                id: 3,
+                type: "mutation",
+                stage: "Shallow nested mutation",
+                line: 5,
+                description: "Changing shallowCopy.profile.city also changes original.profile.city because both share profile-1."
+            },
+            {
+                id: 4,
+                type: "mutation",
+                stage: "Deep nested mutation",
+                line: 6,
+                description: "Changing deepCopy.profile.city affects only profile-2; the original remains Mumbai."
+            },
+            {
+                id: 5,
+                type: "console",
+                stage: "Original value logged",
+                line: 8,
+                output: "Mumbai",
+                description: "The original changed when the shallow copy's nested profile was mutated."
+            },
+            {
+                id: 6,
+                type: "console",
+                stage: "Shallow copy value logged",
+                line: 9,
+                output: "Mumbai",
+                description: "The shallow copy points to the same nested profile as the original."
+            },
+            {
+                id: 7,
+                type: "console",
+                stage: "Deep copy value logged",
+                line: 10,
+                output: "Pune",
+                description: "The deep copy has its own nested profile, so it keeps its independent value."
+            }
+        ]
     },
     {
         id:10,
