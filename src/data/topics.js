@@ -8,12 +8,16 @@ import CopyTopic from "@/components/topics/CopyTopic/CopyTopic";
 import SpreadRestTopic from "@/components/topics/SpreadRestTopic/SpreadRestTopic";
 import ImportExportTopic from "@/components/topics/ImportExportTopic/ImportExportTopic";
 import TypeCoercionTopic from "@/components/topics/TypeCoercionTopic/TypeCoercionTopic";
-import GenericTopicLayout from "@/components/topics/GenericTopicLayout";
-import VarHoisting from "@/components/topics/Hoisting/VarHoisting";
-import LetHoisting from "@/components/topics/Hoisting/LetHoisting";
-import ConstHoisting from "@/components/topics/Hoisting/ConstHoisting";
-import FunctionDeclarationHoisting from "@/components/topics/Hoisting/FunctionDeclarationHoisting";
-import FunctionExpressionHoisting from "@/components/topics/Hoisting/FunctionExpressionHoisting";
+import DOMPropagationTopic from "@/components/topics/DOMPropagationTopic/DOMPropagationTopic";
+import DestructuringTopic from "@/components/topics/DestructuringTopic/DestructuringTopic";
+import ScopeChainTopic from "@/components/topics/ScopeChainTopic/ScopeChainTopic";
+import OptionalChainingTopic from "@/components/topics/OptionalChainingTopic/OptionalChainingTopic";
+import ArrayMethodsTopic from "@/components/topics/ArrayMethodsTopic/ArrayMethodsTopic";
+import PromisesTopic from "@/components/topics/PromisesTopic/PromisesTopic";
+import AsyncAwaitTopic from "@/components/topics/AsyncAwaitTopic/AsyncAwaitTopic";
+import EventLoopTopic from "@/components/topics/EventLoopTopic/EventLoopTopic";
+import RateLimitingTopic from "@/components/topics/RateLimitingTopic/RateLimitingTopic";
+
 
 export const topics = [
 
@@ -903,12 +907,16 @@ greetAman("Hi");`
         description:"Explore JavaScript Promises through an interactive visualization. Watch asynchronous operations move through pending, fulfilled, and rejected states while learning how .then(), .catch(), and .finally() control the flow.",
         difficulty:"Intermediate",
         slug:'promises',
-        component: GenericTopicLayout,
-        code: `const promise = new Promise((resolve, reject) => {
-  resolve("done");
-});
+        component: PromisesTopic,
+        code: `const promise = new Promise((resolve) => {
+      resolve("done");
+    });
 
-promise.then((value) => console.log(value));`,
+    promise.then((value) => console.log(value));`,
+        visualization: {
+            title:"Basic Promise lifecycle",
+            type:"promise-lifecycle"
+        },
         preview: {
             title:"Promises",
             summary:"A Promise represents an eventual result: it can be pending, fulfilled, or rejected.",
@@ -918,17 +926,103 @@ promise.then((value) => console.log(value));`,
             keyPoints:["Pending to fulfilled", "then handles success", "catch handles errors"]
         },
         conceptData: {
-            title:"Promise lifecycle",
-            summary:"Promises model asynchronous work by transitioning through different states and letting you react when they settle.",
+            title:"Promise methods",
+            summary:"Promises represent results that may settle in the future. Chain methods transform or handle one promise; static methods combine multiple promises with different settlement rules.",
             cards:[
-                { title:"Pending", description:"The async operation has started but not finished yet." },
-                { title:"Fulfilled", description:"The operation succeeded and returns a resolved value." },
-                { title:"Rejected", description:"The operation failed and an error is available." }
+                {
+                    title:"then()",
+                    description:"Handles fulfillment, optionally transforms its value, and returns a new promise for the next link in the chain.",
+                    snippet:`fetchData()
+  .then((data) => data.name)
+  .then((name) => console.log(name));`
+                },
+                {
+                    title:"catch()",
+                    description:"Handles a rejection from an earlier promise. Returning a value from catch recovers the chain for later then handlers.",
+                    snippet:`loadUser()
+  .catch((error) => {
+    console.error(error);
+    return null;
+  });`
+                },
+                {
+                    title:"finally()",
+                    description:"Runs cleanup after fulfillment or rejection. It normally passes the original outcome through unchanged.",
+                    snippet:`loadData()
+  .finally(() => hideSpinner());`
+                },
+                {
+                    title:"Promise.all()",
+                    description:"Fulfills when every input fulfills and returns values in input order. Rejects when an input rejects; it does not cancel the other operations.",
+                    snippet:`const results = await Promise.all([
+  loadProfile(),
+  loadSettings()
+]);`
+                },
+                {
+                    title:"Promise.allSettled()",
+                    description:"Waits for every input to settle and returns each outcome as a fulfilled or rejected status record.",
+                    snippet:`const outcomes = await Promise.allSettled([
+  loadProfile(),
+  loadSettings()
+]);`
+                },
+                {
+                    title:"Promise.race()",
+                    description:"Settles with the first input promise that fulfills or rejects.",
+                    snippet:`const firstResult = await Promise.race([
+  fetchData(),
+  timeoutAfter(1000)
+]);`
+                },
+                {
+                    title:"Promise.any()",
+                    description:"Fulfills with the first fulfilled input. It rejects with AggregateError only if every input rejects.",
+                    snippet:`const firstSuccess = await Promise.any([
+  primaryRegion(),
+  backupRegion()
+]);`
+                },
+                {
+                    title:"Promise.resolve() and Promise.reject()",
+                    description:"Create fulfilled or rejected promises from a value or reason. Promise.resolve adopts a promise or thenable passed to it.",
+                    snippet:`const ready = Promise.resolve("ready");
+const failed = Promise.reject(new Error("failed"));`
+                }
             ],
-            takeaways:["async result is tracked", "then/catch react to state", "finally runs regardless"]
+            takeaways:["every Promise settles once as fulfilled or rejected", "Promise.all preserves input order and fails fast", "allSettled waits for every outcome", "race and any select different winning outcomes"]
         },
-        variables:[],
-        steps:[]
+        steps: [
+            {
+                id:0,
+                stage:"Promise created",
+                line:1,
+                promiseState:"pending",
+                value:"waiting",
+                handlerState:"not run",
+                description:"The Promise constructor starts the executor and creates a pending promise."
+            },
+            {
+                id:1,
+                stage:"Promise fulfilled",
+                line:2,
+                promiseState:"fulfilled",
+                value:"done",
+                handlerState:"queued",
+                description:"resolve(\"done\") fulfills the promise with the value done. The attached then handler runs as a microtask."
+            },
+            {
+                id:2,
+                type:"console",
+                stage:"then() handler runs",
+                line:5,
+                promiseState:"fulfilled",
+                value:"done",
+                handlerState:"completed",
+                output:"done",
+                description:"The then handler receives the fulfillment value and logs done."
+            }
+        ]
     },
     {
         id:6,
@@ -936,13 +1030,24 @@ promise.then((value) => console.log(value));`,
         description:"Explore JavaScript async/await through an interactive visualization. Watch asynchronous operations pause and resume execution as Promises settle, and understand how await, try/catch, and error handling shape the async flow.",
         difficulty:"Intermediate",
         slug:'async-await',
-        component: GenericTopicLayout,
-        code: `async function loadUser() {
-  const user = await Promise.resolve({ name: "Aman" });
-  return user.name;
+                component: AsyncAwaitTopic,
+                code: `function getUser() {
+    return new Promise((resolve) => {
+        setTimeout(() => resolve({ name: "Aman" }), 1000);
+    });
 }
 
-loadUser().then(console.log);`,
+async function loadUser() {
+    console.log("Loading user...");
+    const user = await getUser();
+    return user.name;
+}
+
+loadUser().then((name) => console.log(name));`,
+                visualization: {
+                        title:"Async function and await lifecycle",
+                        type:"async-await"
+                },
         preview: {
             title:"async/await",
             summary:"async/await makes Promise-based code easier to read and write by letting you pause execution in an async function.",
@@ -952,17 +1057,129 @@ loadUser().then(console.log);`,
             keyPoints:["async function", "await waits for result", "cleaner error handling"]
         },
         conceptData: {
-            title:"async/await flow",
-            summary:"The await keyword pauses an async function until a Promise settles, making async logic look more like synchronous code.",
+            title:"Async function execution",
+            summary:"An async function always returns a Promise. Within it, await pauses that function until its input settles, then resumes with the fulfillment value or throws the rejection reason. It does not block the JavaScript thread.",
             cards:[
-                { title:"Async", description:"An async function always returns a Promise." },
-                { title:"Await", description:"await pauses the function until the Promise resolves." },
-                { title:"Error handling", description:"try/catch works naturally with async functions." }
+                {
+                    title:"async returns a Promise",
+                    description:"A returned value fulfills the Promise; a thrown error rejects it.",
+                    snippet:`async function getName() {
+  return "Aman";
+}
+
+getName().then(console.log);`
+                },
+                {
+                    title:"await pauses one function",
+                    description:"Execution of the current async function pauses until the Promise settles. Other JavaScript work can continue in the meantime.",
+                    snippet:`async function loadName() {
+  const name = await getName();
+  return name;
+}`
+                },
+                {
+                    title:"Handle rejections",
+                    description:"A rejected Promise makes await throw, so use try/catch or handle the returned Promise with catch().",
+                    snippet:`async function loadUser() {
+  try {
+    return await fetchUser();
+  } catch (error) {
+    return null;
+  }
+}`
+                },
+                {
+                    title:"Run independent work in parallel",
+                    description:"Sequential awaits wait one after another. Use Promise.all when operations are independent and should run concurrently.",
+                    snippet:`const [user, settings] = await Promise.all([
+  fetchUser(),
+  fetchSettings()
+]);`
+                },
+                {
+                    title:"Sequential awaits",
+                    description:"Await in sequence when a later operation needs a value produced by an earlier one.",
+                    snippet:`const user = await fetchUser();
+const posts = await fetchPosts(user.id);`
+                }
             ],
-            takeaways:["reads like sync code", "await resolves Promise values", "try/catch handles failures"]
+            takeaways:["async functions always return Promises", "await resumes with a value or throws a rejection", "await pauses the async function, not the JavaScript thread", "use Promise.all for independent concurrent work"]
         },
-        variables:[],
-        steps:[]
+        steps: [
+            {
+                id:0,
+                stage:"Async function called",
+                line:13,
+                asyncState:"running",
+                requestState:"not started",
+                userValue:"not loaded",
+                result:"pending",
+                description:"Calling loadUser starts an async function and immediately returns a Promise."
+            },
+            {
+                id:1,
+                stage:"Request starts",
+                line:8,
+                asyncState:"running",
+                requestState:"pending",
+                userValue:"not loaded",
+                result:"pending",
+                output:"Loading user...",
+                description:"The function logs its status and calls getUser. The request Promise is still pending."
+            },
+            {
+                id:2,
+                stage:"Function suspended at await",
+                line:9,
+                asyncState:"suspended at await",
+                requestState:"pending",
+                userValue:"waiting for request",
+                result:"pending",
+                description:"await pauses loadUser until getUser's Promise settles; the main JavaScript thread remains available."
+            },
+            {
+                id:3,
+                stage:"Request fulfills",
+                line:3,
+                asyncState:"ready to resume",
+                requestState:"fulfilled",
+                userValue:"{ name: Aman }",
+                result:"pending",
+                description:"The timer resolves the request Promise with the user object."
+            },
+            {
+                id:4,
+                stage:"Async function resumes",
+                line:9,
+                asyncState:"running",
+                requestState:"fulfilled",
+                userValue:"{ name: Aman }",
+                result:"pending",
+                description:"Execution resumes after await and assigns the fulfillment value to user."
+            },
+            {
+                id:5,
+                stage:"Async function fulfills",
+                line:10,
+                asyncState:"completed",
+                requestState:"fulfilled",
+                userValue:"{ name: Aman }",
+                result:"Aman",
+                description:"Returning user.name fulfills the Promise returned by loadUser with Aman."
+            },
+            {
+                id:6,
+                type:"console",
+                stage:"Chained handler runs",
+                line:13,
+                asyncState:"completed",
+                requestState:"fulfilled",
+                userValue:"{ name: Aman }",
+                result:"Aman",
+                output:"Aman",
+                description:"The then handler receives the value fulfilled by loadUser and logs it."
+            }
+        ]
     },
     {
         id:7,
@@ -970,10 +1187,16 @@ loadUser().then(console.log);`,
         description:"Visualize the JavaScript Event Loop in action. Follow tasks as they move between the Call Stack, Web APIs, Microtask Queue, and Callback Queue to understand how JavaScript handles asynchronous execution step by step.",
         difficulty:"Advanced",
         slug:"event-loop",
-        component: GenericTopicLayout,
-        code: `console.log("sync");
-setTimeout(() => console.log("task"), 0);
-Promise.resolve().then(() => console.log("microtask"));`,
+        component: EventLoopTopic,
+        code: `console.log("sync: start");
+    setTimeout(() => console.log("task: timer"), 0);
+    Promise.resolve().then(() => console.log("microtask: promise"));
+    queueMicrotask(() => console.log("microtask: queued"));
+    console.log("sync: end");`,
+        visualization: {
+            title:"Call stack and task queues",
+            type:"event-loop"
+        },
         preview: {
             title:"Event loop",
             summary:"The event loop coordinates the call stack, tasks, and microtasks so JS can handle async work without blocking execution.",
@@ -982,17 +1205,131 @@ Promise.resolve().then(() => console.log("microtask"));`,
             keyPoints:["Call stack", "Microtask queue", "Macrotask queue"]
         },
         conceptData: {
-            title:"How the event loop works",
-            summary:"JavaScript runs one task at a time on the call stack, while microtasks and macrotasks wait in queues to be processed next.",
+            title:"How the event loop schedules work",
+            summary:"JavaScript runs the current task to completion. Once the call stack is empty, the event loop drains microtasks before starting another task such as a timer callback. Browser host APIs schedule timers and other external work.",
             cards:[
-                { title:"Call stack", description:"The current code execution happens here synchronously." },
-                { title:"Microtasks", description:"Promise jobs usually run before the next task." },
-                { title:"Macrotasks", description:"setTimeout and other events are processed later." }
+                {
+                    title:"Call stack and run-to-completion",
+                    description:"Synchronous JavaScript runs on the call stack. The current task finishes before queued callbacks begin.",
+                    snippet:`console.log("first");
+console.log("second");
+// first, then second`
+                },
+                {
+                    title:"Host APIs and timers",
+                    description:"The host environment tracks timers and schedules their callbacks as tasks when they become eligible.",
+                    snippet:`setTimeout(() => {
+  console.log("timer task");
+}, 0);`
+                },
+                {
+                    title:"Microtask queue",
+                    description:"Promise reactions and queueMicrotask callbacks are microtasks. They run after the current task and before the next task.",
+                    snippet:`Promise.resolve().then(() => console.log("promise"));
+queueMicrotask(() => console.log("queued"));`
+                },
+                {
+                    title:"Task queue",
+                    description:"Timer callbacks and many user events are scheduled as tasks. A task waits until the current stack and microtask queue are clear.",
+                    snippet:`setTimeout(() => console.log("task"), 0);
+console.log("sync");`
+                },
+                {
+                    title:"Execution order",
+                    description:"After synchronous code completes, the microtask queue is drained before the event loop starts another task.",
+                    snippet:`setTimeout(() => console.log("task"), 0);
+Promise.resolve().then(() => console.log("microtask"));
+console.log("sync");`
+                },
+                {
+                    title:"Microtasks added by microtasks",
+                    description:"The microtask queue continues draining until empty, including microtasks added while earlier microtasks run.",
+                    snippet:`Promise.resolve().then(() => {
+  queueMicrotask(() => console.log("nested microtask"));
+});`
+                }
             ],
-            takeaways:["sync code runs first", "microtasks come before next task", "queues handle async work"]
+            takeaways:["the current task runs to completion", "microtasks drain before the next task", "timer delay is a minimum, not an exact execution time", "the event loop coordinates the stack and host queues"]
         },
-        variables:[],
-        steps:[]
+        steps: [
+            {
+                id:0,
+                stage:"Synchronous task starts",
+                line:1,
+                callStack:["script"],
+                microtasks:[],
+                tasks:[],
+                output:"sync: start",
+                description:"The script begins running as the current task on the call stack."
+            },
+            {
+                id:1,
+                stage:"Timer scheduled",
+                line:2,
+                callStack:["script"],
+                microtasks:[],
+                tasks:["timer callback"],
+                description:"setTimeout registers a callback with the host. It cannot interrupt the running script."
+            },
+            {
+                id:2,
+                stage:"Promise reaction queued",
+                line:3,
+                callStack:["script"],
+                microtasks:["Promise.then callback"],
+                tasks:["timer callback"],
+                description:"The then callback is queued as a microtask because the Promise is already fulfilled."
+            },
+            {
+                id:3,
+                stage:"Second microtask queued",
+                line:4,
+                callStack:["script"],
+                microtasks:["Promise.then callback", "queueMicrotask callback"],
+                tasks:["timer callback"],
+                description:"queueMicrotask adds another callback behind the already queued Promise reaction."
+            },
+            {
+                id:4,
+                stage:"Synchronous task completes",
+                line:5,
+                callStack:[],
+                microtasks:["Promise.then callback", "queueMicrotask callback"],
+                tasks:["timer callback"],
+                output:"sync: end",
+                description:"The script finishes. The call stack is empty, so the event loop can drain microtasks."
+            },
+            {
+                id:5,
+                stage:"Promise microtask runs",
+                line:3,
+                callStack:["Promise.then callback"],
+                microtasks:["queueMicrotask callback"],
+                tasks:["timer callback"],
+                output:"microtask: promise",
+                description:"The Promise reaction runs first because it entered the microtask queue first."
+            },
+            {
+                id:6,
+                stage:"Microtask queue drained",
+                line:4,
+                callStack:["queueMicrotask callback"],
+                microtasks:[],
+                tasks:["timer callback"],
+                output:"microtask: queued",
+                description:"The second microtask runs before the event loop starts the timer task."
+            },
+            {
+                id:7,
+                stage:"Timer task runs",
+                line:2,
+                callStack:["timer callback"],
+                microtasks:[],
+                tasks:[],
+                output:"task: timer",
+                description:"With the call stack and microtask queue clear, the timer callback runs as the next task."
+            }
+        ]
     },
     {
         id:8,
@@ -1299,10 +1636,20 @@ console.log(original.profile.city); // Delhi`
         description:"Explore JavaScript event propagation through an interactive DOM visualization. Follow events through capturing and bubbling phases, then see how event delegation uses propagation to efficiently handle interactions across nested elements.",
         difficulty:"Advanced",
         slug:'DOM-event-propagation',
-        component: GenericTopicLayout,
-        code: `document.querySelector("button").addEventListener("click", () => {
-  console.log("button clicked");
-});`,
+        component: DOMPropagationTopic,
+        code: `const root = document.querySelector("#root");
+    const parent = root.querySelector("#parent");
+    const button = parent.querySelector("button");
+
+    root.addEventListener("click", () => console.log("root capture"), true);
+    parent.addEventListener("click", () => console.log("parent capture"), true);
+    button.addEventListener("click", () => console.log("button target"));
+    parent.addEventListener("click", () => console.log("parent bubble"));
+    root.addEventListener("click", () => console.log("root bubble"));`,
+        visualization: {
+            title:"DOM event path",
+            type:"event-propagation"
+        },
         preview: {
             title:"Event propagation",
             summary:"Events move through capturing and bubbling phases, allowing parent and child elements to respond in a predictable order.",
@@ -1310,17 +1657,62 @@ console.log(original.profile.city); // Delhi`
             keyPoints:["Capturing phase", "Target phase", "Bubbling phase"]
         },
         conceptData: {
-            title:"Propagation phases",
-            summary:"DOM events travel down the tree in capture mode and then up in bubble mode, which is the basis for delegation patterns.",
-            cards:[
-                { title:"Capture", description:"The event is observed from the root down to the target." },
-                { title:"Target", description:"The actual element receiving the event is reached." },
-                { title:"Bubble", description:"The event climbs back up the DOM tree to ancestors." }
-            ],
-            takeaways:["capture goes down", "bubble goes up", "delegation simplifies many handlers"]
+            title:"Propagation subtopics",
+            summary:"A DOM event can travel from ancestor capture listeners toward its target, run listeners at the target, then bubble back through ancestors. Event delegation uses that bubbling path to handle events from descendants.",
+            takeaways:["capture travels toward the target", "target listeners run on the event target", "bubbling enables event delegation"]
         },
-        variables:[],
-        steps:[]
+        subtopics: [
+            {
+                id:"capture",
+                title:"Capture phase",
+                description:"Capture listeners run from the outer ancestor toward the element that was clicked.",
+                snippet:`root.addEventListener("click", onRootCapture, true);
+parent.addEventListener("click", onParentCapture, true);`,
+                steps:[
+                    { id:0, node:"root", phase:"Capture", description:"The event enters the root container and its capture listener runs.", visitedNodes:["root"], output:"root capture" },
+                    { id:1, node:"parent", phase:"Capture", description:"The event continues inward to the parent capture listener.", visitedNodes:["root", "parent"], output:"parent capture" },
+                    { id:2, node:"button", phase:"Target", description:"After capture listeners, the event reaches the clicked button.", visitedNodes:["root", "parent", "button"], output:"button target" }
+                ]
+            },
+            {
+                id:"target",
+                title:"Target phase",
+                description:"At the target phase, listeners attached to the actual clicked element handle the event.",
+                snippet:`button.addEventListener("click", (event) => {
+  console.log("clicked", event.currentTarget);
+});`,
+                steps:[
+                    { id:0, node:"button", phase:"Target", description:"The event target is the button, so its click listener runs here.", visitedNodes:["root", "parent", "button"], output:"button target" }
+                ]
+            },
+            {
+                id:"bubble",
+                title:"Bubbling phase",
+                description:"After target listeners run, the event bubbles from the target through its parent ancestors.",
+                snippet:`parent.addEventListener("click", onParentBubble);
+root.addEventListener("click", onRootBubble);`,
+                steps:[
+                    { id:0, node:"button", phase:"Target", description:"The button handles the event before it bubbles upward.", visitedNodes:["button"], output:"button target" },
+                    { id:1, node:"parent", phase:"Bubble", description:"The bubbling event reaches the parent listener.", visitedNodes:["button", "parent"], output:"parent bubble" },
+                    { id:2, node:"root", phase:"Bubble", description:"The event continues upward to the root listener.", visitedNodes:["button", "parent", "root"], output:"root bubble" }
+                ]
+            },
+            {
+                id:"delegation",
+                title:"Event delegation",
+                description:"A single ancestor listener can handle events from matching descendants by checking event.target as the event bubbles.",
+                snippet:`list.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button) return;
+  console.log(button.dataset.action);
+});`,
+                steps:[
+                    { id:0, node:"button", phase:"Target", description:"A nested button is clicked and becomes event.target.", visitedNodes:["button"], output:"button clicked" },
+                    { id:1, node:"parent", phase:"Bubble", description:"The event bubbles to the parent, where a delegated listener can inspect the original target.", visitedNodes:["button", "parent"], output:"parent handles matching button" },
+                    { id:2, node:"root", phase:"Bubble", description:"Propagation can continue to outer ancestors if it is not stopped.", visitedNodes:["button", "parent", "root"], output:"event continues bubbling" }
+                ]
+            }
+        ]
     },
     {
         id:11,
@@ -1328,14 +1720,22 @@ console.log(original.profile.city); // Delhi`
         description:"Explore JavaScript debouncing through an interactive visualization. Watch rapid events wait for a pause before triggering a function, and understand how debouncing reduces unnecessary executions in search, input, and resize operations.",
         difficulty:"Intermediate",
         slug:"debouncing",
-        component: GenericTopicLayout,
+                component: RateLimitingTopic,
         code: `function debounce(fn, delay) {
-  let timer;
+    let timerId;
   return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
+        clearTimeout(timerId);
+        timerId = setTimeout(() => fn(...args), delay);
   };
-}`,
+}
+const search = debounce((query) => console.log(query), 300);
+setTimeout(() => search("c"), 0);
+setTimeout(() => search("co"), 100);
+setTimeout(() => search("cop"), 200);`,
+                visualization: {
+                        title:"Debounce waits for quiet",
+                        mode:"debounce"
+                },
         preview: {
             title:"Debouncing",
             summary:"Debouncing delays work until a burst of events stops, which reduces unnecessary repeated calls.",
@@ -1343,17 +1743,87 @@ console.log(original.profile.city); // Delhi`
             keyPoints:["Waits for pause", "Reduces repeated calls", "Useful for search and resize"]
         },
         conceptData: {
-            title:"Debounce behavior",
-            summary:"Debouncing resets the timer whenever events continue happening, so the action runs only after inactivity.",
+            title:"Debouncing details",
+            summary:"Debouncing groups a burst of calls. Each new call resets the wait timer; in trailing mode, the callback runs once after calls stop for the configured delay, using the latest arguments and receiver.",
             cards:[
-                { title:"Trigger window", description:"The timer resets with every new event." },
-                { title:"Execution", description:"The callback fires only after the quiet period ends." },
-                { title:"Use case", description:"Helpful for typing, live search, and window resize handling." }
+                {
+                    title:"Trailing debounce",
+                    description:"Each call restarts the timer. The callback runs once after a full quiet period with the most recent call's arguments.",
+                    snippet:`const search = debounce(runSearch, 300);
+search("c");
+search("co");
+search("cop"); // runSearch("cop") after 300ms quiet`
+                },
+                {
+                    title:"Leading and trailing options",
+                    description:"A leading call runs at the start of a burst. Some implementations also allow a trailing call; when both are enabled, a single isolated call may run only once.",
+                    snippet:`const onResize = debounce(handleResize, 250, {
+  leading: true,
+  trailing: true
+});`
+                },
+                {
+                    title:"cancel(), flush(), and maxWait",
+                    description:"Robust debounce utilities may cancel a pending call, run it immediately, or enforce a maximum wait during a continuous stream.",
+                    snippet:`debouncedSearch.cancel();
+debouncedSearch.flush();
+const save = debounce(saveDraft, 300, { maxWait: 1500 });`
+                },
+                {
+                    title:"Common use cases",
+                    description:"Use debounce when only the final value after a burst matters, such as search input, autosave, or resize recalculation.",
+                    snippet:`input.addEventListener(
+  "input",
+  debounce((event) => search(event.target.value), 300)
+);`
+                }
             ],
-            takeaways:["delayed until pause", "great for frequent input", "avoids repeated execution"]
+            takeaways:["each call resets the quiet-period timer", "trailing debounce runs once with the latest arguments", "leading/trailing behavior depends on the implementation", "use maxWait when continuous calls must not defer work forever"]
         },
-        variables:[],
-        steps:[]
+        steps: [
+            {
+                id:0,
+                time:"0 ms",
+                event:'search("c")',
+                timer:"scheduled for 300 ms",
+                invocations:[],
+                description:"The first call starts a 300 ms quiet-period timer."
+            },
+            {
+                id:1,
+                time:"100 ms",
+                event:'search("co")',
+                timer:"previous timer canceled; new timer due at 400 ms",
+                invocations:[],
+                description:"A new call arrives before the timer fires, so debounce cancels and restarts the wait."
+            },
+            {
+                id:2,
+                time:"200 ms",
+                event:'search("cop")',
+                timer:"previous timer canceled; new timer due at 500 ms",
+                invocations:[],
+                description:"Another input resets the timer again and replaces the pending arguments with cop."
+            },
+            {
+                id:3,
+                time:"500 ms",
+                event:"quiet period reached",
+                timer:"timer fires",
+                invocations:["search(\"cop\")"],
+                description:"No call arrived for 300 ms, so the callback runs once with the latest value."
+            },
+            {
+                id:4,
+                type:"console",
+                time:"500 ms",
+                event:"callback completed",
+                timer:"none pending",
+                invocations:["search(\"cop\")"],
+                output:"cop",
+                description:"Only the last search query is processed."
+            }
+        ]
     },
     {
         id:12,
@@ -1361,17 +1831,23 @@ console.log(original.profile.city); // Delhi`
         description:"Visualize JavaScript throttling in action and see how frequent events are limited to a controlled execution rate. Understand how throttling improves performance for scroll, mouse movement, and continuous event handling.",
         difficulty:"Intermediate",
         slug:"throttling",
-        component: GenericTopicLayout,
+                component: RateLimitingTopic,
         code: `function throttle(fn, delay) {
-  let last = 0;
+    let lastRun = -Infinity;
   return (...args) => {
     const now = Date.now();
-    if (now - last >= delay) {
-      last = now;
+        if (now - lastRun >= delay) {
+            lastRun = now;
       fn(...args);
     }
   };
-}`,
+}
+
+const onScroll = throttle(() => console.log("scroll"), 300);`,
+                visualization: {
+                        title:"Throttle limits call rate",
+                        mode:"throttle"
+                },
         preview: {
             title:"Throttling",
             summary:"Throttling limits how often a function can run, even if the event continues firing frequently.",
@@ -1379,17 +1855,104 @@ console.log(original.profile.city); // Delhi`
             keyPoints:["Limits execution rate", "Runs at intervals", "Useful for scroll and mousemove"]
         },
         conceptData: {
-            title:"Throttle behavior",
-            summary:"A throttled function runs at most once within a fixed time window, even if events arrive continuously.",
+            title:"Throttling details",
+            summary:"Throttling limits how often a callback can run. In a leading-edge throttle, the first call runs immediately and later calls are ignored until the interval expires. Other implementations can schedule one trailing call with the latest arguments.",
             cards:[
-                { title:"Rate limit", description:"Execution happens every configured interval." },
-                { title:"Timing", description:"Events are dropped or ignored until the next allowed window." },
-                { title:"Use case", description:"Useful in heavy scroll and animation handlers." }
+                {
+                    title:"Leading-edge throttle",
+                    description:"Runs the first call immediately, then allows at most one call per interval. Calls inside the active window are ignored.",
+                    snippet:`const onScroll = throttle(handleScroll, 200);
+window.addEventListener("scroll", onScroll);`
+                },
+                {
+                    title:"Trailing calls",
+                    description:"A trailing-edge option stores the latest call and runs it once when the current interval ends. Leading and trailing options vary by implementation.",
+                    snippet:`const update = throttle(render, 200, {
+  leading: true,
+  trailing: true
+});`
+                },
+                {
+                    title:"Time windows",
+                    description:"The interval is a minimum spacing between allowed executions, not a guarantee that a callback runs at exact wall-clock intervals.",
+                    snippet:`// allowed: 0ms, 200ms, 400ms
+const onMove = throttle(handleMove, 200);`
+                },
+                {
+                    title:"Common use cases",
+                    description:"Use throttle when ongoing events need periodic updates, such as scroll position, pointer movement, or resize work.",
+                    snippet:`window.addEventListener(
+  "scroll",
+  throttle(updatePosition, 100)
+);`
+                },
+                {
+                    title:"Cleanup and animation frames",
+                    description:"Cancel listeners and pending timers when a component unmounts. For visual updates tied to painting, requestAnimationFrame can be a better fit.",
+                    snippet:`window.removeEventListener("scroll", onScroll);
+cancelAnimationFrame(frameId);`
+                }
             ],
-            takeaways:["fixed time intervals", "less frequent execution", "good for performance-sensitive events"]
+            takeaways:["throttle enforces a maximum call rate", "leading and trailing behavior varies by utility", "use trailing calls when the final value must be applied", "requestAnimationFrame may suit frame-based visual updates"]
         },
-        variables:[],
-        steps:[]
+        steps: [
+            {
+                id:0,
+                time:"0 ms",
+                event:"scroll event",
+                decision:"allowed immediately",
+                nextAllowed:"300 ms",
+                invocations:["handleScroll() at 0 ms"],
+                description:"The first event runs immediately and starts a 300 ms rate-limit window."
+            },
+            {
+                id:1,
+                time:"100 ms",
+                event:"scroll event",
+                decision:"ignored inside interval",
+                nextAllowed:"300 ms",
+                invocations:["handleScroll() at 0 ms"],
+                description:"Only 100 ms have passed, so this leading-edge throttle ignores the event."
+            },
+            {
+                id:2,
+                time:"250 ms",
+                event:"scroll event",
+                decision:"ignored inside interval",
+                nextAllowed:"300 ms",
+                invocations:["handleScroll() at 0 ms"],
+                description:"The interval has not expired; no additional callback runs."
+            },
+            {
+                id:3,
+                time:"350 ms",
+                event:"scroll event",
+                decision:"allowed; interval restarts",
+                nextAllowed:"650 ms",
+                invocations:["handleScroll() at 0 ms", "handleScroll() at 350 ms"],
+                description:"The 300 ms window has passed, so this event runs and opens the next window."
+            },
+            {
+                id:4,
+                time:"500 ms",
+                event:"scroll event",
+                decision:"ignored inside interval",
+                nextAllowed:"650 ms",
+                invocations:["handleScroll() at 0 ms", "handleScroll() at 350 ms"],
+                description:"This event arrives before the next allowed time and is ignored."
+            },
+            {
+                id:5,
+                type:"console",
+                time:"500 ms",
+                event:"burst summary",
+                decision:"2 calls from 5 events",
+                nextAllowed:"650 ms",
+                invocations:["handleScroll() at 0 ms", "handleScroll() at 350 ms"],
+                output:"called at 0 ms and 350 ms",
+                description:"Throttling bounds execution frequency during a burst of events."
+            }
+        ]
     },
     {
         id:13,
@@ -1397,9 +1960,27 @@ console.log(original.profile.city); // Delhi`
         description:"Explore JavaScript destructuring through an interactive visualization. See how values are extracted from arrays and objects into variables, and understand default values, renaming, nested destructuring, and rest patterns step by step.",
         difficulty:"Beginner",
         slug:"destructuring",
-        component: GenericTopicLayout,
-        code: `const user = { name: "Aman", age: 23 };
-const { name, age } = user;`,
+                component: DestructuringTopic,
+                code: `const user = {
+    name: "Aman",
+    age: undefined,
+    role: "admin",
+    profile: { city: "Delhi", theme: "dark" }
+};
+const { name, age: userAge = 23, country = "India" } = user;
+const { profile: { city, theme } } = user;
+const numbers = [10, undefined, 30, 40];
+const [first, second = 20, ...remaining] = numbers;
+const { role: userRole, ...publicUser } = user;
+function greet({ name, role }) {
+    return name + " (" + role + ")";
+}
+const greeting = greet(user);
+console.log(name, userAge, country, city, theme, first, second, remaining, userRole, publicUser, greeting);`,
+                visualization: {
+                        title:"Destructuring values",
+                        type:"destructuring"
+                },
         preview: {
             title:"Destructuring",
             summary:"Destructuring reads values from arrays or objects into variables with a cleaner syntax.",
@@ -1407,17 +1988,126 @@ const { name, age } = user;`,
             keyPoints:["Extract values", "Clean syntax", "Supports defaults and renaming"]
         },
         conceptData: {
-            title:"Destructuring basics",
-            summary:"Destructuring simplifies value extraction by matching object keys or array positions to variable names.",
+            title:"Destructuring patterns",
+            summary:"Destructuring reads values from objects by property name and from arrays by position. Patterns can rename bindings, apply defaults, reach nested values, and collect the remaining properties or items.",
             cards:[
-                { title:"Object", description:"You can pull values by their property names." },
-                { title:"Array", description:"Array destructuring uses position-based order." },
-                { title:"Defaults", description:"You can provide fallback values when properties are missing." }
+                {
+                    title:"Object properties and aliases",
+                    description:"Object patterns match property names. Use a colon to bind a property to a different local name.",
+                    snippet:`const user = { name: "Aman", age: 23 };
+const { name, age: userAge } = user;`
+                },
+                {
+                    title:"Array positions",
+                    description:"Array patterns read values by index. Skipped commas ignore positions, and the source does not need to be an array if it is iterable.",
+                    snippet:`const colors = ["red", "blue", "green"];
+const [primary, , tertiary] = colors;`
+                },
+                {
+                    title:"Default values",
+                    description:"Defaults are used when a matched value is undefined, including a missing object property. A null value does not trigger the default.",
+                    snippet:`const user = { name: undefined, role: null };
+const { name = "Guest", role = "member" } = user;
+// name is "Guest"; role is null`
+                },
+                {
+                    title:"Nested destructuring",
+                    description:"Nested patterns reach into child objects or arrays. The parent value must exist unless optional fallback data is provided first.",
+                    snippet:`const user = { profile: { city: "Delhi" } };
+const { profile: { city } } = user;`
+                },
+                {
+                    title:"Rest properties and elements",
+                    description:"A rest pattern collects unbound properties or remaining array elements. Rest must appear last in its pattern.",
+                    snippet:`const { password, ...publicUser } = user;
+const [first, ...remaining] = values;`
+                },
+                {
+                    title:"Function parameters",
+                    description:"Destructuring can unpack object or array arguments directly in a function parameter list. Defaults can be applied to the whole argument too.",
+                    snippet:`function greet({ name = "Guest" } = {}) {
+  return "Hello " + name;
+}`
+                }
             ],
-            takeaways:["cleaner extraction", "works for objects and arrays", "supports defaults and renaming"]
+            takeaways:["object patterns match keys; array patterns match positions", "defaults only replace undefined", "rest patterns must come last", "nested patterns require valid parent values"]
         },
-        variables:[],
-        steps:[]
+        steps: [
+            {
+                id:0,
+                stage:"Source object",
+                line:1,
+                source:"user object",
+                bindings:[{ name:"name", value:"Aman" }, { name:"age", value:"undefined" }, { name:"role", value:"admin" }, { name:"profile.city", value:"Delhi" }, { name:"profile.theme", value:"dark" }],
+                description:"The source object contains top-level properties and a nested profile object."
+            },
+            {
+                id:1,
+                stage:"Object keys and defaults",
+                line:7,
+                source:"user object",
+                bindings:[{ name:"name", value:"Aman" }, { name:"age -> userAge", value:"23 (default)" }, { name:"country", value:"India (default)" }],
+                description:"Object destructuring matches keys, renames age to userAge, and uses defaults for undefined or missing values."
+            },
+            {
+                id:2,
+                stage:"Nested properties",
+                line:8,
+                source:"user.profile",
+                bindings:[{ name:"city", value:"Delhi" }, { name:"theme", value:"dark" }],
+                description:"A nested pattern reads city and theme directly from profile."
+            },
+            {
+                id:3,
+                stage:"Source array",
+                line:9,
+                source:"numbers = [10, undefined, 30, 40]",
+                bindings:[],
+                description:"Array destructuring uses each value's position."
+            },
+            {
+                id:4,
+                stage:"Array positions and rest",
+                line:10,
+                source:"numbers",
+                bindings:[{ name:"first", value:"10" }, { name:"second", value:"20 (default)" }, { name:"remaining", value:"[30, 40]" }],
+                description:"The second position is undefined, so its default applies; rest collects all later items."
+            },
+            {
+                id:5,
+                stage:"Object rest properties",
+                line:11,
+                source:"user object",
+                bindings:[{ name:"role -> userRole", value:"admin" }, { name:"publicUser", value:"remaining properties" }],
+                description:"The role property is renamed, while rest gathers the other enumerable own properties."
+            },
+            {
+                id:6,
+                stage:"Function parameter pattern",
+                line:12,
+                source:"greet(user)",
+                bindings:[{ name:"name", value:"Aman" }, { name:"role", value:"admin" }],
+                description:"The function parameter destructures name and role from the object argument."
+            },
+            {
+                id:7,
+                stage:"Function result",
+                line:15,
+                source:"greeting",
+                bindings:[{ name:"greeting", value:"Aman (admin)" }],
+                description:"The function uses its destructured parameters to return a greeting."
+            },
+            {
+                id:8,
+                type:"console",
+                stage:"Values logged",
+                line:16,
+                source:"console output",
+                bindings:[{ name:"result", value:"Aman, 23, India, Delhi, dark, 10, 20, [30, 40], admin, ... , Aman (admin)" }],
+                output:"Aman 23 India Delhi dark 10 20 [30, 40] admin { ... } Aman (admin)",
+                description:"The final output brings together object, array, default, nested, rest, and parameter bindings."
+            }
+        ]
     },
     {
         id:14,
@@ -1632,10 +2322,16 @@ console.log(greet("Aman"), value);`
         description:"Explore JavaScript array methods through interactive visualizations. Watch elements move, transform, filter, search, and combine as you master map(), filter(), reduce(), find(), some(), every(), sort(), and more.",
         difficulty:"Beginner",
         slug:"array-methods",
-        component: GenericTopicLayout,
-        code: `const nums = [1, 2, 3, 4];
-const doubled = nums.map((n) => n * 2);
-const even = nums.filter((n) => n % 2 === 0);`,
+        component: ArrayMethodsTopic,
+        code: `const scores = [3, 6, 9, 12];
+    const doubled = scores.map((score) => score * 2);
+    const even = scores.filter((score) => score % 2 === 0);
+    const total = scores.reduce((sum, score) => sum + score, 0);
+    console.log(doubled, even, total);`,
+        visualization: {
+            title:"Transform, select, and accumulate",
+            type:"array-methods"
+        },
         preview: {
             title:"Array methods",
             summary:"Array methods transform and inspect collections with concise reusable functions.",
@@ -1643,17 +2339,88 @@ const even = nums.filter((n) => n % 2 === 0);`,
             keyPoints:["map transforms values", "filter keeps matching items", "reduce combines values"]
         },
         conceptData: {
-            title:"Working with arrays",
-            summary:"JavaScript array helpers let you transform, filter, search, and reduce data without writing complex loops.",
+            title:"Core array methods",
+            summary:"map transforms every element into a new array, filter selects elements that pass a test, and reduce combines elements into one accumulated result. These methods leave the original array unchanged unless the callback itself mutates it.",
             cards:[
-                { title:"map", description:"Creates a transformed array from existing values." },
-                { title:"filter", description:"Keeps only elements that match a condition." },
-                { title:"reduce", description:"Combines values into a single result." }
+                {
+                    title:"map",
+                    description:"Calls a callback for each present element and returns a new array containing each callback result. Use it when output length should correspond to input length.",
+                    snippet:`const scores = [3, 6, 9];
+const doubled = scores.map((score) => score * 2);
+// [6, 12, 18]`
+                },
+                {
+                    title:"filter",
+                    description:"Calls a predicate for each present element and returns a new array containing only elements whose predicate is truthy. It may return an empty array.",
+                    snippet:`const scores = [3, 6, 9, 12];
+const even = scores.filter((score) => score % 2 === 0);
+// [6, 12]`
+                },
+                {
+                    title:"reduce",
+                    description:"Carries an accumulator through the array and returns one final value. Provide an initial value to define the accumulator type and handle empty arrays safely.",
+                    snippet:`const scores = [3, 6, 9];
+const total = scores.reduce(
+  (sum, score) => sum + score,
+  0
+);
+// 18`
+                }
             ],
-            takeaways:["transform collections", "simplify iteration", "reduce complexity in code"]
+            takeaways:["map returns one result per visited element", "filter keeps elements when the predicate is truthy", "reduce returns the final accumulator", "an explicit reduce initial value avoids empty-array edge cases"]
         },
-        variables:[],
-        steps:[]
+        otherMethods: [
+            { name:"forEach", description:"Runs a callback for each element without creating a result array.", snippet:`scores.forEach((score) => console.log(score));` },
+            { name:"find", description:"Returns the first element that passes a test, or undefined if none match.", snippet:`scores.find((score) => score > 8);` },
+            { name:"findIndex", description:"Returns the index of the first matching element, or -1 if none match.", snippet:`scores.findIndex((score) => score === 9);` },
+            { name:"some", description:"Returns true when at least one element passes the test.", snippet:`scores.some((score) => score > 10);` },
+            { name:"every", description:"Returns true only when every element passes the test.", snippet:`scores.every((score) => score > 0);` },
+            { name:"includes", description:"Checks whether an array contains a specified value.", snippet:`scores.includes(6);` },
+            { name:"flatMap", description:"Maps each element, then flattens the result by one level.", snippet:`scores.flatMap((score) => [score, score * 2]);` },
+            { name:"slice", description:"Returns a shallow copy of a selected range without changing the original array.", snippet:`scores.slice(1, 3);` },
+            { name:"sort", description:"Sorts array elements in place; provide a comparator for numeric ordering.", snippet:`[...scores].sort((a, b) => a - b);` }
+        ],
+        subtopics: [
+            {
+                id:"map",
+                title:"map",
+                input:"[3, 6, 9, 12]",
+                steps:[
+                    { id:0, stage:"Prepare map", current:"-", action:"Start mapping", result:[], description:"map visits each element and stores the callback result in a new array." },
+                    { id:1, stage:"Map element 1", current:"3", action:"3 * 2 = 6", result:[6], description:"The callback transforms 3 into 6." },
+                    { id:2, stage:"Map element 2", current:"6", action:"6 * 2 = 12", result:[6, 12], description:"The callback transforms 6 into 12." },
+                    { id:3, stage:"Map element 3", current:"9", action:"9 * 2 = 18", result:[6, 12, 18], description:"The callback transforms 9 into 18." },
+                    { id:4, stage:"Map element 4", current:"12", action:"12 * 2 = 24", result:[6, 12, 18, 24], description:"The callback transforms 12 into 24; map returns the completed array." },
+                    { id:5, type:"console", stage:"Mapped array", current:"-", action:"doubled", result:[6, 12, 18, 24], output:"[6, 12, 18, 24]", description:"The mapped array contains one transformed value for each input element." }
+                ]
+            },
+            {
+                id:"filter",
+                title:"filter",
+                input:"[3, 6, 9, 12]",
+                steps:[
+                    { id:0, stage:"Prepare filter", current:"-", action:"Start filtering", result:[], description:"filter tests each element and begins with an empty result array." },
+                    { id:1, stage:"Test element 1", current:"3", action:"3 % 2 === 0 -> false", result:[], description:"3 fails the predicate, so it is not included." },
+                    { id:2, stage:"Test element 2", current:"6", action:"6 % 2 === 0 -> true", result:[6], description:"6 passes the predicate and is kept." },
+                    { id:3, stage:"Test element 3", current:"9", action:"9 % 2 === 0 -> false", result:[6], description:"9 fails the predicate, leaving the result unchanged." },
+                    { id:4, stage:"Test element 4", current:"12", action:"12 % 2 === 0 -> true", result:[6, 12], description:"12 passes the predicate and is added to the result." },
+                    { id:5, type:"console", stage:"Filtered array", current:"-", action:"even", result:[6, 12], output:"[6, 12]", description:"filter returns a new array containing only elements that passed the predicate." }
+                ]
+            },
+            {
+                id:"reduce",
+                title:"reduce",
+                input:"[3, 6, 9, 12]",
+                steps:[
+                    { id:0, stage:"Prepare reduce", current:"-", action:"Start with 0", result:"0", description:"The second reduce argument sets the initial accumulator to 0." },
+                    { id:1, stage:"Accumulate element 1", current:"3", action:"0 + 3", result:"3", description:"The callback adds 3 to the accumulator." },
+                    { id:2, stage:"Accumulate element 2", current:"6", action:"3 + 6", result:"9", description:"The callback adds 6 to the previous result." },
+                    { id:3, stage:"Accumulate element 3", current:"9", action:"9 + 9", result:"18", description:"The callback adds 9 to the previous result." },
+                    { id:4, stage:"Accumulate element 4", current:"12", action:"18 + 12", result:"30", description:"The callback adds 12 to the previous result." },
+                    { id:5, type:"console", stage:"Reduced value", current:"-", action:"total", result:"30", output:"30", description:"reduce returns the final accumulator as one value." }
+                ]
+            }
+        ]
     },
     {
         id:17,
@@ -1661,14 +2428,27 @@ const even = nums.filter((n) => n % 2 === 0);`,
         description:"Explore the JavaScript scope chain through an interactive visualization. Follow how variables are searched through nested lexical scopes, from the current function to its outer environments, and understand how JavaScript resolves variable access step by step",
         difficulty:"Intermediate",
         slug:"scope-chain",
-        component: GenericTopicLayout,
-        code: `function outer() {
-  let message = "outer";
-  function inner() {
-    console.log(message);
-  }
-  inner();
-}`,
+                component: ScopeChainTopic,
+                code: `const globalValue = "global";
+const shared = "global shared";
+
+function outer() {
+    const outerValue = "outer";
+    const shared = "outer shared";
+    function inner() {
+        const innerValue = "inner";
+        console.log(innerValue);
+        console.log(outerValue);
+        console.log(shared);
+        console.log(globalValue);
+    }
+    inner();
+}
+outer();`,
+                visualization: {
+                        title:"Lexical scope lookup",
+                        type:"scope-chain"
+                },
         preview: {
             title:"Scope chain",
             summary:"The scope chain is the lookup path JavaScript uses to find variables across nested lexical scopes.",
@@ -1676,17 +2456,117 @@ const even = nums.filter((n) => n % 2 === 0);`,
             keyPoints:["Inner can access outer", "Lookup walks outward", "Current scope checked first"]
         },
         conceptData: {
-            title:"How lookup works",
-            summary:"JavaScript searches from the current scope outward through parent scopes until it finds a match or reaches the global scope.",
+                        title:"Lexical scope and lookup",
+                        summary:"JavaScript resolves an identifier by searching the current lexical environment, then each enclosing environment, and finally the global environment. The first matching binding wins.",
             cards:[
-                { title:"Current scope", description:"The engine checks the local scope first." },
-                { title:"Parent scopes", description:"If not found, it keeps moving outward." },
-                { title:"Global", description:"The global scope is the final lookup point in normal programs." }
+                                {
+                                        title:"Local to outer lookup",
+                                        description:"A function can read its own bindings and bindings in the scopes where it was defined. Lookup stops at the first matching name.",
+                                        snippet:`const site = "global";
+function outer() {
+    const page = "outer";
+    function inner() {
+        console.log(page, site);
+    }
+}`
+                                },
+                                {
+                                        title:"Global scope",
+                                        description:"The global environment is the outermost lexical environment. It is checked only after all enclosing local scopes miss.",
+                                        snippet:`const appName = "Visual Lab";
+
+function showName() {
+    return appName;
+}`
+                                },
+                                {
+                                        title:"Shadowing",
+                                        description:"A binding in an inner scope can reuse an outer name. The inner binding shadows the outer one within its scope.",
+                                        snippet:`const status = "global";
+function render() {
+    const status = "local";
+    return status; // "local"
+}`
+                                },
+                                {
+                                        title:"Block scope",
+                                        description:"let and const create bindings in their block. var is function-scoped, so its lookup behavior differs from block-scoped declarations.",
+                                        snippet:`let result = "outside";
+{
+    let result = "inside";
+    console.log(result); // "inside"
+}
+console.log(result); // "outside"`
+                                },
+                                {
+                                        title:"Closures retain outer access",
+                                        description:"A nested function keeps access to its lexical environment after the outer function returns. This is the same lookup chain used by closures.",
+                                        snippet:`function makeReader() {
+    const message = "remembered";
+    return () => message;
+}
+
+const read = makeReader();
+read(); // "remembered"`
+                                },
+                                {
+                                        title:"Unresolved identifiers",
+                                        description:"If no binding exists in the current scope or any outer scope, reading that identifier throws a ReferenceError.",
+                                        snippet:`function readValue() {
+    return missingValue;
+}
+
+readValue(); // ReferenceError`
+                                }
             ],
-            takeaways:["searches outward", "nested scopes can access parents", "global is last resort"]
+                        takeaways:["lookup starts in the current lexical scope", "the nearest binding wins and can shadow outer names", "unresolved reads throw ReferenceError", "closures preserve access to outer lexical bindings"]
         },
-        variables:[],
-        steps:[]
+                steps: [
+                        {
+                                id:0,
+                                stage:"Local binding found",
+                                line:9,
+                                target:"innerValue",
+                                value:"inner",
+                                resolvedIn:"inner",
+                                checkedScopes:["inner"],
+                                output:"inner",
+                                description:"innerValue is declared in inner, so lookup resolves immediately without checking parent scopes."
+                        },
+                        {
+                                id:1,
+                                stage:"Parent binding found",
+                                line:10,
+                                target:"outerValue",
+                                value:"outer",
+                                resolvedIn:"outer",
+                                checkedScopes:["inner", "outer"],
+                                output:"outer",
+                                description:"outerValue is not local to inner, so JavaScript checks outer and finds it there."
+                        },
+                        {
+                                id:2,
+                                stage:"Nearest shadowing binding wins",
+                                line:11,
+                                target:"shared",
+                                value:"outer shared",
+                                resolvedIn:"outer",
+                                checkedScopes:["inner", "outer"],
+                                output:"outer shared",
+                                description:"Both outer and global define shared. Lookup stops at outer, the nearest binding, so the global value is shadowed."
+                        },
+                        {
+                                id:3,
+                                stage:"Global binding found",
+                                line:12,
+                                target:"globalValue",
+                                value:"global",
+                                resolvedIn:"global",
+                                checkedScopes:["inner", "outer", "global"],
+                                output:"global",
+                                description:"No local or outer binding exists for globalValue, so lookup reaches the global environment."
+                        }
+                ]
     },
     {
         id:18,
@@ -1805,10 +2685,20 @@ console.log("5" === 5); // false`
         topic:"Optional Chaining & Nullish Coalescing",
         description:"Explore JavaScript ?. and ?? through an interactive visualization. See how optional chaining safely accesses nested properties without errors, while nullish coalescing provides fallback values only when data is null or undefined.",
         difficulty:"Beginner",
-        slug:"optional-chaining -&-nullish-coalescing",
-        component: GenericTopicLayout,
+        slug:"optional-chaining-nullish-coalescing",
+        component: OptionalChainingTopic,
         code: `const user = { profile: { name: "Aman" } };
-console.log(user.profile?.name ?? "Guest");`,
+    const missingUser = {};
+    const safeName = missingUser.profile?.name;
+    const displayName = safeName ?? "Guest";
+    const blankLabel = "" ?? "Fallback";
+    const zeroCount = 0 ?? 10;
+    const greeting = user.profile?.name ?? "Guest";
+    console.log(displayName, blankLabel, zeroCount, greeting);`,
+        visualization: {
+            title:"Safe access and nullish fallbacks",
+            type:"optional-chaining-nullish"
+        },
         preview: {
             title:"Optional chaining and nullish coalescing",
             summary:"Optional chaining safely works with nested values, while nullish coalescing only falls back on null or undefined.",
@@ -1816,17 +2706,120 @@ console.log(user.profile?.name ?? "Guest");`,
             keyPoints:["Safe nested access", "Only nullish fallback", "Protects against runtime errors"]
         },
         conceptData: {
-            title:"Safe access patterns",
-            summary:"These operators help handle missing values without writing lots of defensive checks.",
+            title:"Optional chaining and nullish coalescing",
+            summary:"Optional chaining stops a property, element, or method access when the value before ?. is null or undefined. Nullish coalescing supplies a fallback only for null or undefined, preserving other falsy values such as 0, false, and the empty string.",
             cards:[
-                { title:"Optional chaining", description:"Stops at nullish values instead of throwing." },
-                { title:"Nullish coalescing", description:"Provides a fallback only when the value is null or undefined." },
-                { title:"Use case", description:"Great for safe API or config access." }
+                {
+                    title:"Optional property access",
+                    description:"Use ?. before a property when an earlier part of the chain may be null or undefined. The whole access returns undefined instead of throwing.",
+                    snippet:`const city = user.profile?.address?.city;`
+                },
+                {
+                    title:"Optional method calls",
+                    description:"Use ?.() to call a method only when the method value is present. Arguments are not evaluated when the call short-circuits.",
+                    snippet:`const result = service.onReady?.("loaded");`
+                },
+                {
+                    title:"Optional element access",
+                    description:"Use ?.[] to safely access an array index or a property with a computed key.",
+                    snippet:`const firstItem = response.items?.[0];`
+                },
+                {
+                    title:"Nullish fallback",
+                    description:"The right side of ?? is used only when the left side is null or undefined.",
+                    snippet:`const displayName = user.name ?? "Guest";`
+                },
+                {
+                    title:"Falsy values stay intact",
+                    description:"Unlike ||, ?? does not replace 0, false, or an empty string.",
+                    snippet:`0 || 10;  // 10
+0 ?? 10;  // 0
+"" ?? "Fallback"; // ""`
+                },
+                {
+                    title:"Nullish assignment",
+                    description:"The ??= operator assigns a fallback only when the existing value is null or undefined.",
+                    snippet:`let retries;
+retries ??= 3; // 3`
+                },
+                {
+                    title:"Operator grouping",
+                    description:"Parenthesize when mixing ?? with && or ||; JavaScript does not allow them to be mixed ungrouped.",
+                    snippet:`const label = (input || "") ?? "Untitled";`
+                }
             ],
-            takeaways:["avoid unsafe nested access", "fallback only for nullish values", "cleaner defensive code"]
+            takeaways:["?. short-circuits only on null or undefined", "?? preserves other falsy values", "parenthesize when mixing ?? with && or ||", "optional chaining does not make an undeclared root identifier safe"]
         },
-        variables:[],
-        steps:[]
+        steps: [
+            {
+                id:0,
+                type:"access",
+                stage:"Optional access short-circuits",
+                line:3,
+                expression:"missingUser.profile?.name",
+                accessResult:"undefined",
+                leftValue:"undefined",
+                fallback:"\"Guest\"",
+                result:"pending",
+                description:"missingUser.profile is undefined, so optional chaining stops before reading name."
+            },
+            {
+                id:1,
+                type:"fallback",
+                stage:"Nullish fallback used",
+                line:4,
+                expression:"safeName ?? \"Guest\"",
+                accessResult:"undefined",
+                leftValue:"undefined",
+                fallback:"\"Guest\"",
+                result:"Guest",
+                description:"Since safeName is undefined, ?? evaluates and returns the fallback."
+            },
+            {
+                id:2,
+                type:"fallback",
+                stage:"Empty string preserved",
+                line:5,
+                expression:"\"\" ?? \"Fallback\"",
+                accessResult:"not used",
+                leftValue:"\"\"",
+                fallback:"\"Fallback\"",
+                result:"\"\"",
+                description:"An empty string is not nullish, so the fallback is skipped."
+            },
+            {
+                id:3,
+                type:"fallback",
+                stage:"Zero preserved",
+                line:6,
+                expression:"0 ?? 10",
+                accessResult:"not used",
+                leftValue:"0",
+                fallback:"10",
+                result:"0",
+                description:"Zero is not nullish, so ?? keeps it instead of using 10."
+            },
+            {
+                id:4,
+                type:"access",
+                stage:"Existing value passes through",
+                line:7,
+                expression:"user.profile?.name ?? \"Guest\"",
+                accessResult:"Aman",
+                leftValue:"Aman",
+                fallback:"\"Guest\"",
+                result:"Aman",
+                description:"The property exists, so optional chaining returns Aman and the nullish fallback is not used."
+            },
+            {
+                id:5,
+                type:"console",
+                stage:"Results logged",
+                line:8,
+                output:"Guest, \"\", 0, Aman",
+                description:"The final values show both a used fallback and falsy values preserved by ??."
+            }
+        ]
     }
 
 ]
