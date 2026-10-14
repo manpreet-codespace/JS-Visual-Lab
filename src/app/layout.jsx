@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata = {
    title: "JS Visual Lab — Learn JavaScript Visually",
   description:
-    "Learn JavaScript with interactive visualizations of execution context, hoisting, closures, scope, promises, and the event loop.",
+     "Explore JavaScript concepts through interactive visual lessons on execution context, hoisting, closures, scope, promises, and the event loop.",
   robots: {
     index: true,
     follow: true,
